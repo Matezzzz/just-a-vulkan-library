@@ -16,15 +16,15 @@ SHADER_RESULT_FILES := $(join $(SHADER_RESULT_DIRS), $(SHADER_RESULT_NAMES))
 
 .PHONY: clean app dependencies shaders all
 all: app dependencies shaders
-app: ../JAVL.a
+app: ../libJAVL.a
 dependencies: $(DEPENDENCY_FILES)
 shaders: $(SHADER_RESULT_FILES)
 
 
-../JAVL.a: $(OBJ_FILES)
-	del ../JAVL.a 2>null
+../libJAVL.a: $(OBJ_FILES)
+	@del ../libJAVL.a || rem
 	$(info Creating library: $@)
-	@ar rvs $@ $^ 
+	@ar rvs $@ $^
 #-o $@ $(LDFLAGS)
 
 -include $(DEPENDENCY_FILES)
