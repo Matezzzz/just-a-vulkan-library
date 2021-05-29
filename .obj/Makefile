@@ -16,14 +16,16 @@ SHADER_RESULT_FILES := $(join $(SHADER_RESULT_DIRS), $(SHADER_RESULT_NAMES))
 
 .PHONY: clean app dependencies shaders all
 all: app dependencies shaders
-app: ../vulkan.exe
+app: ../JAVL.a
 dependencies: $(DEPENDENCY_FILES)
 shaders: $(SHADER_RESULT_FILES)
 
 
-../vulkan.exe: $(OBJ_FILES)
-	$(info Linking: $@)
-	@g++ $^ -o $@ $(LDFLAGS)
+../JAVL.a: $(OBJ_FILES)
+	del ../JAVL.a 2>null
+	$(info Creating library: $@)
+	@ar rvs $@ $^ 
+#-o $@ $(LDFLAGS)
 
 -include $(DEPENDENCY_FILES)
 

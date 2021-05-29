@@ -1,11 +1,4 @@
-.VSCodeCounter/2021-01-05_19-43-58/details.md
-.VSCodeCounter/2021-01-05_19-43-58/results.csv
-.VSCodeCounter/2021-01-05_19-43-58/results.md
-.VSCodeCounter/2021-01-05_19-43-58/results.txt
-.VSCodeCounter/2021-01-08_02-29-26/details.md
-.VSCodeCounter/2021-01-08_02-29-26/results.csv
-.VSCodeCounter/2021-01-08_02-29-26/results.md
-.VSCodeCounter/2021-01-08_02-29-26/results.txt
+.VSCodeCounter/*
 .obj/mixed_buffer.d
 .obj/mixed_buffer.o
 .obj/multisample_info.d
@@ -46,7 +39,6 @@
 .obj/vulkan_instance.o
 .obj/window.d
 .obj/window.o
-vulkan.exe
 .obj/allocator.d
 .obj/allocator.o
 .obj/blend_info.d
