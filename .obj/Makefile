@@ -1,5 +1,5 @@
 DEPENDS_DIR := ../.dependencies
-SRC_FILES := $(wildcard ../*/*.cpp) ../main.cpp
+SRC_FILES := $(wildcard ../*/*.cpp)
 
 DEPENDENCY_FILES := $(addsuffix .d, $(basename $(notdir $(SRC_FILES))))
 OBJ_FILES := $(addsuffix .o, $(basename $(notdir $(SRC_FILES))))
