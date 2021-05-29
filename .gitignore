@@ -89,3 +89,4 @@ vulkan.exe
 .vscode/launch.json
 .vscode/settings.json
 .vscode/tasks.json
+main.cpp
