@@ -82,7 +82,10 @@ public:
     const VkImageCreateInfo& get() const;
     operator const VkImageCreateInfo&() const;
 
-    Image create() const;
+    Image createImage() const;
+
+    //create image with view
+    ExtImage create() const;
 };
 
 #endif

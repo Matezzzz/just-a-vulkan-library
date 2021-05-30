@@ -118,6 +118,20 @@ public:
 };
 
 
+class ExtImage : public Image{
+    ImageView m_view;
+public:
+    ExtImage(VkImage image, const VkImageCreateInfo& info) : Image(image, info), m_view(createView())
+    {}
+    operator VkImageView(){
+        return m_view;
+    }
+    VkImageView view() const{
+        return m_view;
+    }
+};
+
+
 //return a vector of pointers to each element of vector given
 template<typename T>
 vector<T*> vectorOfPointers(vector<T>& vec);

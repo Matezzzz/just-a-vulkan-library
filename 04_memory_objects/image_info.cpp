@@ -52,7 +52,11 @@ const VkImageCreateInfo& ImageInfo::get() const{
 ImageInfo::operator const VkImageCreateInfo&() const{
     return m_info;
 }
-Image ImageInfo::create() const{
+Image ImageInfo::createImage() const{
     //create image with given info
     return Image{g_allocator.get().createImage(m_info), m_info};
+}
+ExtImage ImageInfo::create() const{
+    //create image and view with given info
+    return ExtImage{g_allocator.get().createImage(m_info), m_info};
 }
