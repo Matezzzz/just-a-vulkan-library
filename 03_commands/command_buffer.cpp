@@ -81,10 +81,19 @@ void CommandBuffer::cmdBeginRenderPass(RenderPassSettings& settings, VkRenderPas
 void CommandBuffer::cmdBindPipeline(const Pipeline& pipeline){
     vkCmdBindPipeline(m_buffer, pipeline.getBindPoint(), pipeline);
 }
+void CommandBuffer::cmdBindPipeline(const Pipeline& pipeline, VkDescriptorSet set){
+    //bind pipeline, then it's descriptor set
+    cmdBindPipeline(pipeline);
+    cmdBindSet(pipeline, set);
+}
 void CommandBuffer::cmdBindPipeline(const Pipeline& pipeline, const vector<VkDescriptorSet>& sets){
     //bind pipeline, then it's descriptor sets
     cmdBindPipeline(pipeline);
     cmdBindSets(pipeline, sets);
+}
+void CommandBuffer::cmdBindSet(const Pipeline& pipeline, VkDescriptorSet set){
+    //record binding given descriptor sets                                          0 -> no offset; 1 -> set count;  (0, nullptr) -> no dynamic offsets 
+    vkCmdBindDescriptorSets(m_buffer, pipeline.getBindPoint(), pipeline.getLayout(), 0, 1, &set, 0, nullptr);
 }
 void CommandBuffer::cmdBindSets(const Pipeline& pipeline, const vector<VkDescriptorSet>& descriptor_sets){
     //record binding given descriptor sets                                                     0 -> no offset                                    (0, nullptr) -> no dynamic offsets 

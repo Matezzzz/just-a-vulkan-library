@@ -82,8 +82,14 @@ public:
     //Bind given pipeline
     void cmdBindPipeline(const Pipeline& pipeline);
 
+    //Bind given pipeline with one set
+    void cmdBindPipeline(const Pipeline& pipeline, VkDescriptorSet set);
+
     //Bind given pipeline with given descriptor sets
     void cmdBindPipeline(const Pipeline& pipeline, const vector<VkDescriptorSet>& sets);
+
+    //Bind given set
+    void cmdBindSet(const Pipeline& pipeline, VkDescriptorSet set);
 
     //Bind given descriptor sets for use with given pipeline 
     void cmdBindSets(const Pipeline& pipeline, const vector<VkDescriptorSet>& descriptor_sets);

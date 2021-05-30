@@ -118,15 +118,21 @@ public:
 };
 
 
+
+/**
+ * ExtImage
+ *  - Holds an image and it's view
+ */
 class ExtImage : public Image{
     ImageView m_view;
 public:
-    ExtImage(VkImage image, const VkImageCreateInfo& info) : Image(image, info), m_view(createView())
+    ExtImage(VkImage image, const VkImageCreateInfo& info) : Image(image, info), m_view()
     {}
     operator VkImageView(){
-        return m_view;
+        return view();
     }
-    VkImageView view() const{
+    VkImageView view(){
+        if (m_view == VK_NULL_HANDLE) m_view = createView();
         return m_view;
     }
 };
