@@ -51,6 +51,10 @@ SampledImageUpdateInfo::SampledImageUpdateInfo(const string& name, VkImageView i
     DescriptorUpdateInfo(name, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, layout, image, VK_NULL_HANDLE)
 {}
 
+StorageImageUpdateInfo::StorageImageUpdateInfo(const string& name, VkImageView image, VkImageLayout layout) : 
+    DescriptorUpdateInfo(name, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, layout, image, VK_NULL_HANDLE)
+{}
+
 UniformBufferUpdateInfo::UniformBufferUpdateInfo(const string& name, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range) :
     DescriptorUpdateInfo(name, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, buffer, offset, range)
 {}

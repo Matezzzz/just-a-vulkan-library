@@ -81,6 +81,16 @@ public:
 };
 
 /**
+ * StorageImageUpdateInfo
+ *  - special DescriptorUpdateInfo subclass for storage images
+ */
+class StorageImageUpdateInfo : public DescriptorUpdateInfo{
+public:
+    StorageImageUpdateInfo(const string& name, VkImageView image, VkImageLayout layout);
+};
+
+
+/**
  * UniformBufferUpdateInfo
  *  - special DescriptorUpdateInfo subclass for uniform buffers
  */
@@ -88,6 +98,8 @@ class UniformBufferUpdateInfo : public DescriptorUpdateInfo{
 public:
     UniformBufferUpdateInfo(const string& name, VkBuffer buffer, VkDeviceSize offset = 0, VkDeviceSize range = VK_WHOLE_SIZE);
 };
+
+
 
 /**
  * StorageBufferUpdateInfo
