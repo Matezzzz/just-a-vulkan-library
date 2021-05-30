@@ -38,6 +38,9 @@ const string shader_descriptor_identifiers[]{
     "usampler1D", "usampler2D", "usampler3D",
 
     "image1D", "image2D", "image3D",
+    "iimage1D", "iimage2D", "iimage3D",
+    "uimage1D", "uimage2D", "uimage3D",
+
     "samplerBuffer", "imageBuffer",
     "subpassInput",
     "UNIFORM_BUFFER", "STORAGE_BUFFER", "UNDEFINED"
@@ -55,6 +58,9 @@ constexpr DescriptorType descriptor_types[]{
     TYPE_COMBINED_IMAGE_1D, TYPE_COMBINED_IMAGE_2D, TYPE_COMBINED_IMAGE_3D,
 
     TYPE_STORAGE_IMAGE_1D, TYPE_STORAGE_IMAGE_2D, TYPE_STORAGE_IMAGE_3D,
+    TYPE_STORAGE_IMAGE_1D, TYPE_STORAGE_IMAGE_2D, TYPE_STORAGE_IMAGE_3D,
+    TYPE_STORAGE_IMAGE_1D, TYPE_STORAGE_IMAGE_2D, TYPE_STORAGE_IMAGE_3D,
+    
     TYPE_UNIFORM_TEXEL_BUFFER, TYPE_STORAGE_TEXEL_BUFFER,
     TYPE_INPUT_ATTACHMENT,
     TYPE_UNIFORM_BUFFER, TYPE_STORAGE_BUFFER,
