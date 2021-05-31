@@ -150,23 +150,45 @@ public:
         //call internal update function to fill all write infos and eventually update them
         updateDescriptorsInternal(sets, 0, update_infos...);
     }
-private:
-    //if there are no more infos to convert to VkWriteDescriptorSet objects, update all descriptors using vkUpdateDescriptorSets function
-    void updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t){
+
+    //update descriptors using given vector of infos (update descriptors vector)
+    void updateDescriptorsV(const vector<DescriptorUpdateInfo>& infos){
+        vector<VkWriteDescriptorSet> writes(infos.size());
+        //convert infos to VkWriteDescriptorSet structures
+        for (int i = 0; i < infos.size(); i++){
+            saveDescriptorWriteInfo(writes[i], infos[i]);
+        }
+        //update descriptor sets
+        updateDescriptorSets(writes);
+    }
+    //update all descriptors using vkUpdateDescriptorSets function
+    void updateDescriptorSets(const vector<VkWriteDescriptorSet>& write_infos){
         vkUpdateDescriptorSets(g_device, write_infos.size(), write_infos.data(), 0, nullptr);
+    }
+private:
+    //if there are no more infos to convert to VkWriteDescriptorSet objects, update sets 
+    void updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t){
+        updateDescriptorSets(write_infos);
     }
 
     //fill write info at current_index with information from info, then call updateDescriptorsInternal again with update infos
     template<typename ...Ts>
     void updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t current_index, const DescriptorUpdateInfo& info, const Ts&... update_infos)
     {
+        saveDescriptorWriteInfo(write_infos[current_index], info);
+        //call the template function to update following write infos
+        updateDescriptorsInternal(write_infos, ++current_index, update_infos...);
+    }
+
+    //convert one write info to VkWriteDescriptorSet object and save it to given reference
+    void saveDescriptorWriteInfo(VkWriteDescriptorSet& write_info, const DescriptorUpdateInfo& info){
         uint32_t descriptor_index = m_layout->find(info.getName());
         if (descriptor_index != NPOS_32BIT){
             //check whether shader descriptor type is of the same type as update info
             VkDescriptorType shader_descriptor_type = vulkanDescriptorType((*m_layout)[descriptor_index].getType());
             if (shader_descriptor_type == info.getType()){
                 //fill VkWriteDescriptorSet structure
-                write_infos[current_index] = VkWriteDescriptorSet{
+                write_info = VkWriteDescriptorSet{
                     VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                     nullptr, m_set, descriptor_index, 0,
                     1, shader_descriptor_type,
@@ -178,8 +200,6 @@ private:
         }else{
             PRINT_ERROR(info.getName() << ": Descriptor of given name not found.")
         }
-        //call the template function to update following write infos
-        updateDescriptorsInternal(write_infos, ++current_index, update_infos...);
     }
 };
 
