@@ -26,6 +26,11 @@ public:
     Pipeline(VkPipeline pipeline, VkPipelineLayout layout, VkPipelineBindPoint bind_point);
 
     /**
+     * Construct an empty, invalid pipeline
+     */
+    Pipeline();
+
+    /**
      * Return a handle to pipeline layout.
      */
     VkPipelineLayout getLayout() const;

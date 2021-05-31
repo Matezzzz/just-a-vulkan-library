@@ -4,7 +4,9 @@
 
 Pipeline::Pipeline(VkPipeline pipeline, VkPipelineLayout layout, VkPipelineBindPoint bind_point) :
     m_pipeline(pipeline), m_layout(layout), m_bind_point(bind_point)
-{}   
+{}
+Pipeline::Pipeline() : Pipeline(VK_NULL_HANDLE, VK_NULL_HANDLE, VK_PIPELINE_BIND_POINT_MAX_ENUM)
+{}
 VkPipelineLayout Pipeline::getLayout() const{
     return m_layout;
 }
