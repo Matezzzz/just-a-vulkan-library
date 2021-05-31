@@ -24,19 +24,25 @@ void CommandBuffer::resetBuffer(bool release_resources){
     VkResult result = vkResetCommandBuffer(m_buffer, release_resources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);
     DEBUG_CHECK("Reset command buffer", result)
 }
-void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, vector<VkBufferMemoryBarrier> memory_barriers){
+void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkBufferMemoryBarrier>& memory_barriers){
     //record buffer memory barriers
     vkCmdPipelineBarrier(m_buffer, past_stages, next_stages, 0,
         0, nullptr,     //no memory barriers
-        memory_barriers.size(), &memory_barriers[0], 
+        memory_barriers.size(), memory_barriers.data(), 
         0, nullptr);    //no image barriers
 }
-void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, vector<VkImageMemoryBarrier> memory_barriers){
+void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const VkImageMemoryBarrier& memory_barrier){
+    vkCmdPipelineBarrier(m_buffer, past_stages, next_stages, 0,
+        0, nullptr,     //no memory barriers
+        0, nullptr,     //no buffer barriers
+        1, &memory_barrier);
+}
+void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkImageMemoryBarrier>& memory_barriers){
     //record image memory barriers
     vkCmdPipelineBarrier(m_buffer, past_stages, next_stages, 0,
         0, nullptr,     //no memory barriers
         0, nullptr,     //no buffer barriers
-        memory_barriers.size(), &memory_barriers[0]);
+        memory_barriers.size(), memory_barriers.data());
 }
 void CommandBuffer::cmdCopyFromBuffer(const Buffer& from, const Buffer& to, VkDeviceSize size, VkDeviceSize from_offset, VkDeviceSize to_offset){
     //if the whole size should be copied, get actual size from source buffer

@@ -32,22 +32,30 @@ public:
      * @param release_resources if true, all resources(memory) that the buffer occupied will be freed as well, otherwise the buffer can be recorded again into the same space
      */
     void resetBuffer(bool release_resources);
-    
+
     /**
      * Insert given memory barriers into the buffer.
      * @param past_stages the stage that has to be finished for the memory barrier to execute
      * @param next_stages the stage at which the barrier will wait for past_stages to finish
-     * @param memory_barriers the memory barriers specifying which buffers the memory barriers are bound to
+     * @param memory_barriers the memory barriers to insert
      */
-    void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, vector<VkBufferMemoryBarrier> memory_barriers);
+    void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkBufferMemoryBarrier>& memory_barriers);
     
+    /**
+     * Insert given memory barrier into the buffer.
+     * @param past_stages the stage that has to be finished for the memory barrier to execute
+     * @param next_stages the stage at which the barrier will wait for past_stages to finish
+     * @param barrier the memory barrier to insert
+     */
+    void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const VkImageMemoryBarrier& barrier);
+
     /**
      * Insert given memory barriers into the buffer.
      * @param past_stages the stage that has to be finished for the memory barrier to execute
      * @param next_stages the stage at which the barrier will wait for past_stages to finish
      * @param memory_barriers the memory barriers specifying which images the memory barriers are bound to, and how to change layouts and access flags of each image
      */
-    void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, vector<VkImageMemoryBarrier> memory_barriers);
+    void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkImageMemoryBarrier>& memory_barriers);
 
     //Fill image with given color. Image must have VK_IMAGE_TRANSFER_DST flag on    
     void cmdClearColor(const Image& image, VkClearColorValue color);
