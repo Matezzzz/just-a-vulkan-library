@@ -354,7 +354,7 @@ public:
 
     /**
      * Allocate descriptor sets into structures passed.
-     * @param sets - the sets to write allocated sets into. Each element has to reflect amount of reserved sets, and there has to be same amount of variables as sets. Pass DESCRIPTOR_SET_SKIP to skip a set, DescriptorData& to allocate one set, and SetVector to allocate multiple sets
+     * @param sets the sets to write allocated sets into. Each element has to reflect amount of reserved sets, and there has to be same amount of variables as sets. Pass DESCRIPTOR_SET_SKIP to skip a set, DescriptorData& to allocate one set, and SetVector to allocate multiple sets
      */
     template<typename ...Ts>
     void allocateDescriptorSets(Ts&... sets){
