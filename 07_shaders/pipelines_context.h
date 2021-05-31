@@ -155,7 +155,7 @@ public:
     void updateDescriptorsV(const vector<DescriptorUpdateInfo>& infos){
         vector<VkWriteDescriptorSet> writes(infos.size());
         //convert infos to VkWriteDescriptorSet structures
-        for (int i = 0; i < infos.size(); i++){
+        for (int i = 0; i < (int) infos.size(); i++){
             saveDescriptorWriteInfo(writes[i], infos[i]);
         }
         //update descriptor sets
