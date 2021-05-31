@@ -90,6 +90,20 @@ public:
      */
     VkImageMemoryBarrier createMemoryBarrier(VkImageLayout new_layout, VkAccessFlags new_access,
         uint32_t current_q_family=VK_QUEUE_FAMILY_IGNORED, uint32_t new_q_family=VK_QUEUE_FAMILY_IGNORED);
+    
+    /**
+     * Create memory barrier on the image. This typically signifies that the image has to transition to new access and layout.
+     * @param layout the layout the image is currently in - m_current_layout is not used as it can be wrong sometimes
+     * @param access the access the image is currently using - m_current_access is not used as it can be wrong sometimes
+     * @param new_layout the layout to transition to
+     * @param new_access the types of access after the transition
+     * @param current_q_family the index of the current queue family that owns the image. Can be omitted.
+     * @param new_q_family the index of the next queue family that should own the image. Can be omitted.
+     */
+    VkImageMemoryBarrier createMemoryBarrier(VkImageLayout layout, VkAccessFlags access, VkImageLayout new_layout, VkAccessFlags new_access,
+        uint32_t current_q_family=VK_QUEUE_FAMILY_IGNORED, uint32_t new_q_family=VK_QUEUE_FAMILY_IGNORED);
+
+
     /**
      * Create image view of same format as image.
      * @param view_type what format the view should have. This can be omitted to use the same type the image has. Different settings can be used to create cubemap views and such. Accepted values are VK_IMAGE_VIEW_TYPE_***

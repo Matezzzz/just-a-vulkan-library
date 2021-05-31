@@ -62,12 +62,16 @@ Image::Image(VkImage image, const VkImageCreateInfo& info) :
 }
 VkImageMemoryBarrier Image::createMemoryBarrier(VkImageLayout new_layout, VkAccessFlags new_access,  uint32_t current_q_family, uint32_t new_q_family)
 {
+    return createMemoryBarrier(m_current_layout, m_current_access, new_layout, new_access, current_q_family, new_q_family);
+}
+VkImageMemoryBarrier Image::createMemoryBarrier(VkImageLayout layout, VkAccessFlags access, VkImageLayout new_layout, VkAccessFlags new_access,  uint32_t current_q_family, uint32_t new_q_family)
+{
     //create image memory barrier
     VkImageMemoryBarrier barrier
     {
         VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, nullptr, 
-        m_current_access, new_access,
-        m_current_layout, new_layout,
+        access, new_access,
+        layout, new_layout,
         current_q_family, new_q_family,
         m_image,
         //         mip level to start from,    array layer to start from
