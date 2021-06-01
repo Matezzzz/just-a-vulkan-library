@@ -94,7 +94,7 @@ const VkPipelineShaderStageCreateInfo& ShaderStages::getCompute() const{
     //if there are more than one stage, shader stages cannot be compute, print error
     if (size() != 1) PRINT_ERROR("Cannot retrieve the right amount of stages(1), size: " << size())
     //if the only stage isn't compute, print error
-    if ((*this)[0].flags != VK_SHADER_STAGE_COMPUTE_BIT) PRINT_ERROR("Trying to retrieve compute shader stage, but the first stage isn't compute.")
+    if ((*this)[0].stage != VK_SHADER_STAGE_COMPUTE_BIT) PRINT_ERROR("Trying to retrieve compute shader stage, but the first stage isn't compute")
     //return first and only stage
     return (*this)[0];
 }

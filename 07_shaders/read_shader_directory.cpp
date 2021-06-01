@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 //all shader stages
 enum ShaderStage{VERTEX, GEOMETRY, TESSELATION_EVALUATION, TESSELATION_CONTROL, FRAGMENT, COMPUTE, SHADER_STAGE_COUNT, SHADER_STAGE_INVALID};
 //corresponding vulkan flags
-const VkShaderStageFlagBits vulkan_shader_stages[]{VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_FRAGMENT_BIT};
+const VkShaderStageFlagBits vulkan_shader_stages[]{VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 VkShaderStageFlagBits getVulkanShaderStage(ShaderStage s) {return vulkan_shader_stages[s];}
 //corresponding file extensions
 const string shader_stage_extensions[]{".vert", ".geom", ".tese", ".tesc", ".frag", ".comp"};
