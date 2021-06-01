@@ -11,7 +11,7 @@ DescriptorUpdateInfo::DescriptorUpdateInfo(const string& name, VkDescriptorType 
     m_name{name}, m_type(UPDATE_INFO_BUFFER), m_info(new VkDescriptorBufferInfo{buffer, offset, range}), m_vulkan_type(type)
 {}
 DescriptorUpdateInfo::DescriptorUpdateInfo(const DescriptorUpdateInfo& i) :
-    m_name{i.m_name}, m_type{i.m_type}, m_info{copyInfo()}, m_vulkan_type{i.m_vulkan_type}
+    m_name{i.m_name}, m_type{i.m_type}, m_info{i.copyInfo()}, m_vulkan_type{i.m_vulkan_type}
 {}
 DescriptorUpdateInfo& DescriptorUpdateInfo::operator=(const DescriptorUpdateInfo& i){
     m_name = i.m_name;
