@@ -36,10 +36,12 @@ public:
     //constructor for image and combined image and sampler
     DescriptorUpdateInfo(const string& name, VkDescriptorType type, VkImageLayout layout, VkImageView image, VkSampler sampler);
 
+    DescriptorUpdateInfo(const DescriptorUpdateInfo& i);
+    DescriptorUpdateInfo& operator=(const DescriptorUpdateInfo& i);
+
     //constructor for buffer variables
     DescriptorUpdateInfo(const string& name, VkDescriptorType type, VkBuffer buffer, VkDeviceSize offset = 0, VkDeviceSize range = VK_WHOLE_SIZE);
     ~DescriptorUpdateInfo();
-public:
 
     bool isImage() const;
     const string& getName() const;
@@ -50,6 +52,9 @@ public:
 
     //return buffer info if descriptor being updated is a buffer, otherwise return nullptr
     const VkDescriptorBufferInfo* bufferInfo() const;
+private:
+    //create a copy of m_info and return a pointer to it
+    void* copyInfo() const;
 };
 
 /**

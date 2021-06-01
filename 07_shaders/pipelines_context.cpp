@@ -10,6 +10,16 @@ DescriptorUpdateInfo::DescriptorUpdateInfo(const string& name, VkDescriptorType 
 DescriptorUpdateInfo::DescriptorUpdateInfo(const string& name, VkDescriptorType type, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range) :
     m_name{name}, m_type(UPDATE_INFO_BUFFER), m_info(new VkDescriptorBufferInfo{buffer, offset, range}), m_vulkan_type(type)
 {}
+DescriptorUpdateInfo::DescriptorUpdateInfo(const DescriptorUpdateInfo& i) :
+    m_name{i.m_name}, m_type{i.m_type}, m_info{copyInfo()}, m_vulkan_type{i.m_vulkan_type}
+{}
+DescriptorUpdateInfo& DescriptorUpdateInfo::operator=(const DescriptorUpdateInfo& i){
+    m_name = i.m_name;
+    m_type = i.m_type;
+    m_info = i.copyInfo();
+    m_vulkan_type = i.m_vulkan_type;
+    return *this;
+}
 DescriptorUpdateInfo::~DescriptorUpdateInfo(){
     //delete info based on type
     if (isImage()){
@@ -37,6 +47,13 @@ const VkDescriptorBufferInfo* DescriptorUpdateInfo::bufferInfo() const{
     if (!isImage()) return reinterpret_cast<VkDescriptorBufferInfo*>(m_info);
     return nullptr;
 }
+void* DescriptorUpdateInfo::copyInfo() const{
+    if (m_type == UPDATE_INFO_IMAGE){
+        return (void*) new VkDescriptorImageInfo(* (VkDescriptorImageInfo*) m_info);
+    }
+    return (void*) new VkDescriptorBufferInfo(* (VkDescriptorBufferInfo*) m_info);
+}
+
 
 
 SamplerUpdateInfo::SamplerUpdateInfo(const string& name, VkSampler sampler) :
