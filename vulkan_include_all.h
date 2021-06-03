@@ -2,6 +2,7 @@
 
 #include "00_base/vulkan_base.h"
 #include "00_base/extension_utilities.h"
+#include "00_base/vulkan_enum_strings.h"
 
 #include "01_device/vulkan_instance.h"
 #include "01_device/allocator.h"
