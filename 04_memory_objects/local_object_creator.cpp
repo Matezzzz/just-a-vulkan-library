@@ -34,8 +34,8 @@ void LocalObjectCreator::copyToLocal(const uint8_t* data_bytes, uint32_t data_si
     transfer_synchronization.setEndFence(Fence());
     //submit task to the queue and wait for it to finish
     m_transfer_queue.submit(m_transfer_command_buffer, transfer_synchronization);
-    //if it didn't finish in time, print error
-    if (!transfer_synchronization.waitFor(A_SHORT_WHILE)) PRINT_ERROR("Vulkan buffer copy failed")
+    //wait for it to finish
+    transfer_synchronization.waitFor(A_SHORT_WHILE);
     //reset recorded buffer
     m_transfer_command_buffer.resetBuffer(false);
 }

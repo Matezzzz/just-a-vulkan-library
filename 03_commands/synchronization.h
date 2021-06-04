@@ -124,7 +124,7 @@ public:
      * Check whether all command buffers have finished - the fence is signalled.
      * @param timeout how long to wait before returning false
      */
-    bool waitFor(uint32_t timeout) const;
+    void waitFor(uint32_t timeout);
 
     /**
      * Returns fence if set, else VK_NULL_HANDLE.

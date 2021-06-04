@@ -94,7 +94,7 @@ public:
             //submit command buffer to queue
             m_transfer_queue.submit(m_transfer_command_buffer, transfer_synchronization);
             //wait a while for the transfer to finish, print error if it took too long
-            if (!transfer_synchronization.waitFor(A_SHORT_WHILE)) PRINT_ERROR("Vulkan buffer copy failed") 
+            transfer_synchronization.waitFor(A_SHORT_WHILE);
         }
     }
     /**

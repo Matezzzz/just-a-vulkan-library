@@ -80,14 +80,17 @@ SubmitSynchronization& SubmitSynchronization::addStartSemaphore(VkSemaphore sema
     m_start_semaphores_stage_flags.push_back(start_pipeline_flags);
     return *this;
 }
-bool SubmitSynchronization::waitFor(uint32_t timeout) const{
+void SubmitSynchronization::waitFor(uint32_t timeout){
     //if there is no end fance to wait for, print error and return false
     if (!m_end_fence.valid()){
         PRINT_ERROR("No end fence set, nothing to wait for")
-        return false;
     }
     //otherwise, wait for the fence
-    return m_end_fence.waitFor(timeout);
+    if (m_end_fence.waitFor(timeout)){
+        m_end_fence.reset();
+    }else{
+        PRINT_ERROR("Waiting for queue expired")
+    }
 }
 Fence SubmitSynchronization::getEndFence() const{
     return m_end_fence;
