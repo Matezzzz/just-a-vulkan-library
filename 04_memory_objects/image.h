@@ -3,7 +3,6 @@
 
 #include "../00_base/vulkan_base.h"
 
-
 /**
  * Represents image format.
  */
@@ -16,6 +15,53 @@ public:
     //get size in bytes of one pixel of this format
     uint8_t getSize() const;
 };
+
+
+enum ImageStatesEnum{
+    IMAGE_NEWLY_CREATED,
+    IMAGE_SAMPLER,
+    IMAGE_STORAGE_R,
+    IMAGE_STORAGE_W,
+    IMAGE_STORAGE_RW,
+    IMAGE_TRANSFER_SRC,
+    IMAGE_TRANSFER_DST
+};
+constexpr VkImageLayout image_states_layouts[]{
+    VK_IMAGE_LAYOUT_UNDEFINED,
+    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_GENERAL,
+    VK_IMAGE_LAYOUT_GENERAL,
+    VK_IMAGE_LAYOUT_GENERAL,
+    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+};
+constexpr VkAccessFlags image_states_accesses[]{
+    0,
+    VK_ACCESS_SHADER_READ_BIT,
+    VK_ACCESS_SHADER_READ_BIT,
+    VK_ACCESS_SHADER_WRITE_BIT,
+    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+    VK_ACCESS_TRANSFER_READ_BIT,
+    VK_ACCESS_TRANSFER_WRITE_BIT
+};
+
+
+constexpr VkImageLayout LAYOUT_NOT_USED_YET = VK_IMAGE_LAYOUT_MAX_ENUM;
+class ImageState{
+public:
+    VkImageLayout layout;
+    VkAccessFlags access;
+    
+    ImageState(VkImageLayout layout_, VkAccessFlags access_);
+    ImageState(ImageStatesEnum s);
+    bool operator==(const ImageState& s);
+    bool operator!=(const ImageState& s);
+    string toString() const;
+};
+
+
+
+
 
 class Image;
 
@@ -41,12 +87,6 @@ public:
 
     //get format of parent image
     const Format& getFormat() const;
-    
-    //get current layout of parent image
-    //! This is just an attempt to make it possible to omit specifying image layout when calling vulkan functions on an image.
-    //! There are cases when this won't represent the actual layout the image is in.
-    //! This part of the library should be reworked in the future
-    VkImageLayout getLayout() const;
 
     //Get aspect of parent image
     VkImageAspectFlags getAspect() const;
@@ -69,11 +109,6 @@ class Image{
     VkExtent3D m_size;
     Format m_format;
 
-    //! This is just an attempt to make it possible to omit specifying image layout when calling vulkan functions on an image.
-    //! There are cases when this won't represent the actual layout the image is in.
-    //! This part of the library should be reworked in the future
-    VkImageLayout m_current_layout;
-    VkAccessFlags m_current_access;
     //Whether the image is depth, stencil, color, ...
     VkImageAspectFlags m_aspect;
 public:
@@ -81,28 +116,15 @@ public:
     Image();
     //create image wrapper for given image with given creation info 
     Image(VkImage image, const VkImageCreateInfo& info);
-    /**
-     * Create memory barrier on the image. This typically signifies that the image has to transition to new access and layout. 
-     * @param new_layout the layout to transition to
-     * @param new_access the types of access after the transition
-     * @param current_q_family the index of the current queue family that owns the image. Can be omitted.
-     * @param new_q_family the index of the next queue family that should own the image. Can be omitted.
-     */
-    VkImageMemoryBarrier createMemoryBarrier(VkImageLayout new_layout, VkAccessFlags new_access,
-        uint32_t current_q_family=VK_QUEUE_FAMILY_IGNORED, uint32_t new_q_family=VK_QUEUE_FAMILY_IGNORED);
     
     /**
      * Create memory barrier on the image. This typically signifies that the image has to transition to new access and layout.
-     * @param layout the layout the image is currently in - m_current_layout is not used as it can be wrong sometimes
-     * @param access the access the image is currently using - m_current_access is not used as it can be wrong sometimes
-     * @param new_layout the layout to transition to
-     * @param new_access the types of access after the transition
+     * @param state the layout and access the image is currently in
+     * @param new_state  the layout and access to transition to
      * @param current_q_family the index of the current queue family that owns the image. Can be omitted.
      * @param new_q_family the index of the next queue family that should own the image. Can be omitted.
      */
-    VkImageMemoryBarrier createMemoryBarrier(VkImageLayout layout, VkAccessFlags access, VkImageLayout new_layout, VkAccessFlags new_access,
-        uint32_t current_q_family=VK_QUEUE_FAMILY_IGNORED, uint32_t new_q_family=VK_QUEUE_FAMILY_IGNORED);
-
+    VkImageMemoryBarrier createMemoryBarrier(ImageState state, ImageState new_state, uint32_t current_q_family=VK_QUEUE_FAMILY_IGNORED, uint32_t new_q_family=VK_QUEUE_FAMILY_IGNORED) const;
 
     /**
      * Create image view of same format as image.
@@ -121,8 +143,6 @@ public:
     operator const VkImage&() const;
     const VkExtent3D& getSize() const;
     const Format& getFormat() const;
-    VkImageLayout getLayout() const;
-    void setLayout(VkImageLayout layout);
     VkImageAspectFlags getAspect() const;
 
     //Get the size the image will occupy in bytes. This is used mainly to determine size for copying operations

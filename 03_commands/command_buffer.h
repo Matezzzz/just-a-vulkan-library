@@ -3,6 +3,7 @@
 
 
 #include "../00_base/vulkan_base.h"
+#include "../04_memory_objects/image.h"
 
 class Buffer;
 class Image;
@@ -57,8 +58,13 @@ public:
      */
     void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkImageMemoryBarrier>& memory_barriers);
 
-    //Fill image with given color. Image must have VK_IMAGE_TRANSFER_DST flag on    
-    void cmdClearColor(const Image& image, VkClearColorValue color);
+    /**
+     * Fill image with given color
+     * @param image the image to fill
+     * @param state current image state
+     * @param color the color to fill with
+     */
+    void cmdClearColor(const Image& image, ImageState state, VkClearColorValue color);
 
     /**
      * Copy data from one buffer to another
@@ -74,10 +80,10 @@ public:
      * Copy data from buffer to image
      * @param from source buffer
      * @param to target image
-     * @param end_layout image layout after copying
-     * @param end_access access flags after copying
+     * @param state state the image is in
+     * @param end_state state the image should end in
      */
-    void cmdCopyToTexture(const Buffer& from, Image& to, VkImageLayout end_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkAccessFlags end_access = 0);
+    void cmdCopyToTexture(const Buffer& from, Image& to, ImageState state, ImageState end_state);
 
     /**
      * Begin renderpass

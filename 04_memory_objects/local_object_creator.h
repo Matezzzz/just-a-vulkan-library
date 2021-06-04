@@ -101,20 +101,20 @@ public:
      * Copy given data to an image on the GPU
      * @param data data to copy
      * @param device_local_image the image to copy into
-     * @param end_layout the layout the image should have after copying
-     * @param end_access the access the image should have after copying
+     * @param state the state the image is now in
+     * @param end_state the state the image should be in after copying
      */
-    void copyToLocal(const vector<uint8_t>& data, Image& device_local_image, VkImageLayout end_layout, VkAccessFlags end_access = 0);
+    void copyToLocal(const vector<uint8_t>& data, Image& device_local_image, ImageState state, ImageState end_state);
 
     /**
      * Copy given data to an image on the GPU
      * @param data_bytes pointer to data to copy
      * @param data_size_bytes how many bytes to copy
      * @param device_local_image the image to copy into
-     * @param end_layout the layout the image should have after copying
-     * @param end_access the access the image should have after copying
+     * @param state the state the image is now in
+     * @param end_state the state the image should be in after copying
      */
-    void copyToLocal(const uint8_t* data_bytes, uint32_t data_size_bytes, Image& device_local_image, VkImageLayout end_layout, VkAccessFlags end_access = 0);
+    void copyToLocal(const uint8_t* data_bytes, uint32_t data_size_bytes, Image& device_local_image, ImageState state, ImageState end_state);
 
 
     /**

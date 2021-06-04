@@ -56,29 +56,29 @@ void CommandBuffer::cmdCopyFromBuffer(const Buffer& from, const Buffer& to, VkDe
     VkBufferCopy copy{from_offset, to_offset, size};
     vkCmdCopyBuffer(m_buffer, from, to, 1, &copy);
 }
-void CommandBuffer::cmdCopyToTexture(const Buffer& from, Image& texture, VkImageLayout end_layout, VkAccessFlags end_access)
+void CommandBuffer::cmdCopyToTexture(const Buffer& from, Image& texture, ImageState state, ImageState end_state)
 {
+    ImageState transfer_state = ImageState(IMAGE_TRANSFER_DST);
     //if the image isn't in the correct layout already, record a memory barrier to change the layout
-    if (texture.getLayout() != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL){
-        cmdBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,\
-            {texture.createMemoryBarrier(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT)});
+    if (state != transfer_state){
+        cmdBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, texture.createMemoryBarrier(state, ImageState(IMAGE_TRANSFER_DST)));
     }
     //values - buffer offset, buffer_row_length(0 for tightly packed), buffer_image_height(0 for tightly packed)
     // - VkImageSubresourceLayers - aspect, mipmap level to copy to, base array layer to copy to, number of layers to copy to
     // - VkOffset3D - offset in image to copy into
     // - size of image volume to copy into
     VkBufferImageCopy copy{0, 0, 0, VkImageSubresourceLayers{texture.getAspect(), 0, 0, 1}, VkOffset3D{0, 0, 0}, texture.getSize()};
-    vkCmdCopyBufferToImage(m_buffer, from, texture, texture.getLayout(), 1, &copy);
+    vkCmdCopyBufferToImage(m_buffer, from, texture, state.layout, 1, &copy);
     //if layout needs to be transitioned after end, record the layout transition
-    if (end_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL){
-        cmdBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, {texture.createMemoryBarrier(end_layout, end_access)});
+    if (end_state != transfer_state){
+        cmdBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, texture.createMemoryBarrier(transfer_state, end_state));
     }
 }
-void CommandBuffer::cmdClearColor(const Image& image, VkClearColorValue color){
+void CommandBuffer::cmdClearColor(const Image& image, ImageState state, VkClearColorValue color){
     //range - all mipmaps, all array layers
     VkImageSubresourceRange range{image.getAspect(), 0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS};
     //record filling the image with color
-    vkCmdClearColorImage(m_buffer, image, image.getLayout(), &color, 1, &range);
+    vkCmdClearColorImage(m_buffer, image, state.layout, &color, 1, &range);
 }
 void CommandBuffer::cmdBeginRenderPass(RenderPassSettings& settings, VkRenderPass render_pass, VkFramebuffer framebuffer){
     //INLINE - renderpass contains no secondary command buffers

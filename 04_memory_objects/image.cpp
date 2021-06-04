@@ -1,5 +1,6 @@
 #include "image.h"
 
+#include "../00_base/vulkan_enum_strings.h"
 #include "../01_device/allocator.h"
 #include "mixed_buffer.h"
 
@@ -26,6 +27,27 @@ uint8_t Format::getSize() const{
 
 
 
+
+ImageState::ImageState(VkImageLayout layout_, VkAccessFlags access_) :
+    layout(layout_), access(access_)
+{}
+ImageState::ImageState(ImageStatesEnum s) : ImageState(image_states_layouts[s], image_states_accesses[s])
+{}
+bool ImageState::operator==(const ImageState& s){
+    return layout == s.layout && access == s.access;
+}
+bool ImageState::operator!=(const ImageState& s){
+    return !(*this == s);
+}
+string ImageState::toString() const{
+    return "(" + VkImageLayoutToString(layout) + ", " + VkAccessFlagsToString(access) + ")";
+}
+
+
+
+
+
+
 ImageView::ImageView() : m_view(VK_NULL_HANDLE), m_parent_image(nullptr)
 {}
 ImageView::ImageView(VkImageView view, const Image& image) : m_view(view), m_parent_image(&image)
@@ -35,9 +57,6 @@ ImageView::operator VkImageView() const{
 }
 const Format& ImageView::getFormat() const{
     return m_parent_image->getFormat();
-}
-VkImageLayout ImageView::getLayout() const{
-    return m_parent_image->getLayout();
 }
 VkImageAspectFlags ImageView::getAspect() const{
     return m_parent_image->getAspect();
@@ -49,10 +68,10 @@ const Image& ImageView::getImage() const{
 
 
 //create invalid image
-Image::Image() : m_image(VK_NULL_HANDLE), m_type(VK_IMAGE_TYPE_MAX_ENUM), m_size{0, 0, 0}, m_format(VK_FORMAT_UNDEFINED), m_current_layout(VK_IMAGE_LAYOUT_UNDEFINED), m_current_access(0), m_aspect(0)
+Image::Image() : m_image(VK_NULL_HANDLE), m_type(VK_IMAGE_TYPE_MAX_ENUM), m_size{0, 0, 0}, m_format(VK_FORMAT_UNDEFINED), m_aspect(0)
 {}
 Image::Image(VkImage image, const VkImageCreateInfo& info) :
-    m_image(image), m_type(info.imageType), m_size(info.extent), m_format(info.format), m_current_layout(info.initialLayout), m_current_access(0)
+    m_image(image), m_type(info.imageType), m_size(info.extent), m_format(info.format)
 {
     //derive image aspect from its' format
     if (m_format == VK_FORMAT_S8_UINT) m_aspect = VK_IMAGE_ASPECT_STENCIL_BIT;
@@ -60,26 +79,19 @@ Image::Image(VkImage image, const VkImageCreateInfo& info) :
     else if (m_format == VK_FORMAT_D16_UNORM_S8_UINT || m_format == VK_FORMAT_D24_UNORM_S8_UINT   || m_format == VK_FORMAT_D32_SFLOAT_S8_UINT)   m_aspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
     else m_aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 }
-VkImageMemoryBarrier Image::createMemoryBarrier(VkImageLayout new_layout, VkAccessFlags new_access,  uint32_t current_q_family, uint32_t new_q_family)
-{
-    return createMemoryBarrier(m_current_layout, m_current_access, new_layout, new_access, current_q_family, new_q_family);
-}
-VkImageMemoryBarrier Image::createMemoryBarrier(VkImageLayout layout, VkAccessFlags access, VkImageLayout new_layout, VkAccessFlags new_access,  uint32_t current_q_family, uint32_t new_q_family)
+VkImageMemoryBarrier Image::createMemoryBarrier(ImageState state, ImageState new_state, uint32_t current_q_family, uint32_t new_q_family) const
 {
     //create image memory barrier
     VkImageMemoryBarrier barrier
     {
         VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, nullptr, 
-        access, new_access,
-        layout, new_layout,
+        state.access, new_state.access,
+        state.layout, new_state.layout,
         current_q_family, new_q_family,
         m_image,
         //         mip level to start from,    array layer to start from
         {m_aspect, 0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS}
     };
-    //track the current layout and access flags the image has
-    m_current_layout = new_layout;
-    m_current_access = new_access;
     //return created memory barrier
     return barrier;
 }
@@ -113,12 +125,6 @@ VkDeviceSize Image::getSizeInBytes() const{
 }
 const Format& Image::getFormat() const{
     return m_format;
-}
-VkImageLayout Image::getLayout() const{
-    return m_current_layout;
-}
-void Image::setLayout(VkImageLayout layout){
-    m_current_layout = layout;
 }
 VkImageAspectFlags Image::getAspect() const{
     return m_aspect;

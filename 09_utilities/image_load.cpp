@@ -21,8 +21,8 @@ uint32_t ImageData::size(){
 
 
 
-ImageSetOptions::ImageSetOptions(const string& filename_base, VkImageLayout layout, VkAccessFlags access_flags) :
-    m_base_name(filename_base), m_layout(layout), m_access_flags(access_flags)
+ImageSetOptions::ImageSetOptions(const string& filename_base, ImageState state) :
+    m_base_name(filename_base), m_state(state)
 {}
 ImageSetOptions& ImageSetOptions::addDiffuse(const string& filename){
     return add(IMAGE_TYPE_DIFFUSE, filename);
@@ -42,11 +42,8 @@ ImageSetOptions& ImageSetOptions::addHeightMap(const string& filename){
 ImageSetOptions& ImageSetOptions::addMetallic(const string& filename){
     return add(IMAGE_TYPE_METALLIC, filename);
 }
-VkImageLayout ImageSetOptions::getLayout() const{
-    return m_layout;
-}
-VkAccessFlags ImageSetOptions::getAccessFlags() const{
-    return m_access_flags;
+ImageState ImageSetOptions::getState() const{
+    return m_state;
 }
 ImageSetOptions& ImageSetOptions::add(ImageType type, const string& filename){
     //add given image info to the list. Filename is derived from (base name = directory + prefix)_(image name)
@@ -91,7 +88,7 @@ void ImageSet::createImages(LocalObjectCreator& object_creator, const ImageSetOp
 
     //copy loaded image data to each image
     for (uint32_t i = 0; i < image_count; i++){
-        object_creator.copyToLocal(image_data[i].data.data(), image_data[i].size(), getImage(i), options.getLayout(), options.getAccessFlags());
+        object_creator.copyToLocal(image_data[i].data.data(), image_data[i].size(), getImage(i), ImageState{IMAGE_NEWLY_CREATED}, options.getState());
     }
 }
 vector<const Image*> ImageSet::vectorOfImages(){

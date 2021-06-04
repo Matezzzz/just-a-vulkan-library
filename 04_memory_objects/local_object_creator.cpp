@@ -12,10 +12,10 @@ LocalObjectCreator::LocalObjectCreator(Queue& transfer_queue, VkDeviceSize stagi
     m_transfer_queue(transfer_queue)
 {}
 
-void LocalObjectCreator::copyToLocal(const vector<uint8_t>& data, Image& device_local_image, VkImageLayout end_layout, VkAccessFlags end_access){
-    copyToLocal(data.data(), data.size(), device_local_image, end_layout, end_access);
+void LocalObjectCreator::copyToLocal(const vector<uint8_t>& data, Image& device_local_image, ImageState state, ImageState end_state){
+    copyToLocal(data.data(), data.size(), device_local_image, state, end_state);
 }
-void LocalObjectCreator::copyToLocal(const uint8_t* data_bytes, uint32_t data_size_bytes, Image& device_local_image, VkImageLayout end_layout, VkAccessFlags end_access){
+void LocalObjectCreator::copyToLocal(const uint8_t* data_bytes, uint32_t data_size_bytes, Image& device_local_image, ImageState state, ImageState end_state){
     //images cannot be copied as multiple parts - if the size to copy is larger than staging buffer, print error
     if (data_size_bytes > m_staging_buffer_size) PRINT_ERROR("Trying to copy data of larger size than staging buffer. Staging buffer size: " << m_staging_buffer_size << ", data size: " << data_size_bytes);
     //if the data to copy and target image have different sizes, print warning
@@ -26,7 +26,7 @@ void LocalObjectCreator::copyToLocal(const uint8_t* data_bytes, uint32_t data_si
     //record command buffer for transfer
     m_transfer_command_buffer.startRecordPrimary(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
     //copy to image command
-    m_transfer_command_buffer.cmdCopyToTexture(m_staging_buffer, device_local_image, end_layout, end_access);
+    m_transfer_command_buffer.cmdCopyToTexture(m_staging_buffer, device_local_image, state, end_state);
     m_transfer_command_buffer.endRecordPrimary();
 
     //synchronization for copy operation with one end fence
