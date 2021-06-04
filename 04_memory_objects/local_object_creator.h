@@ -86,7 +86,7 @@ public:
             m_transfer_command_buffer.startRecordPrimary(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
             //record copy command
             m_transfer_command_buffer.cmdCopyFromBuffer(m_staging_buffer, device_local_buffer, data_end - data_offset, 0, data_offset);
-            m_transfer_command_buffer.endRecordPrimary();
+            m_transfer_command_buffer.endRecord();
 
             //create synchronization for submitting buffer
             SubmitSynchronization transfer_synchronization;

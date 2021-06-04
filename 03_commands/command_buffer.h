@@ -77,9 +77,9 @@ public:
     void startRecordSecondary(const VkCommandBufferInheritanceInfo& inh_info, VkCommandBufferUsageFlags usage = 0);
 
     /**
-     * End recording this command buffer
+     * End recording of this command buffer
      */
-    void endRecordPrimary();
+    void endRecord();
 
     /**
      * Reset the command buffer

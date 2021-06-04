@@ -49,10 +49,10 @@ void CommandBuffer::startRecordSecondary(const VkCommandBufferInheritanceInfo& i
     VkResult result = vkBeginCommandBuffer(m_buffer, &begin_info);
     DEBUG_CHECK("Start secondary command buffer recording", result)
 }
-void CommandBuffer::endRecordPrimary(){
+void CommandBuffer::endRecord(){
     //end recording the buffer
     VkResult result = vkEndCommandBuffer(m_buffer);
-    DEBUG_CHECK("End primary command buffer recording", result)
+    DEBUG_CHECK("End command buffer recording", result)
 }
 void CommandBuffer::resetBuffer(bool release_resources){
     VkResult result = vkResetCommandBuffer(m_buffer, release_resources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);

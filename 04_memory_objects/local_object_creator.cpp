@@ -27,7 +27,7 @@ void LocalObjectCreator::copyToLocal(const uint8_t* data_bytes, uint32_t data_si
     m_transfer_command_buffer.startRecordPrimary(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
     //copy to image command
     m_transfer_command_buffer.cmdCopyToTexture(m_staging_buffer, device_local_image, state, end_state);
-    m_transfer_command_buffer.endRecordPrimary();
+    m_transfer_command_buffer.endRecord();
 
     //synchronization for copy operation with one end fence
     SubmitSynchronization transfer_synchronization;
