@@ -18,6 +18,7 @@ public:
 
 
 enum ImageStatesEnum{
+    IMAGE_INVALID,
     IMAGE_NEWLY_CREATED,
     IMAGE_SAMPLER,
     IMAGE_STORAGE_R,
@@ -27,6 +28,7 @@ enum ImageStatesEnum{
     IMAGE_TRANSFER_DST
 };
 constexpr VkImageLayout image_states_layouts[]{
+    VK_IMAGE_LAYOUT_MAX_ENUM,
     VK_IMAGE_LAYOUT_UNDEFINED,
     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
     VK_IMAGE_LAYOUT_GENERAL,
@@ -36,6 +38,7 @@ constexpr VkImageLayout image_states_layouts[]{
     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 };
 constexpr VkAccessFlags image_states_accesses[]{
+    0,
     0,
     VK_ACCESS_SHADER_READ_BIT,
     VK_ACCESS_SHADER_READ_BIT,
