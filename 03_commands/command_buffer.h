@@ -11,6 +11,48 @@ class RenderPassSettings;
 class Pipeline;
 class PushConstantData;
 
+/**
+ * CommandBufferInheritanceInfo
+ *  - Holds inheritance information needed to create a secondary command buffer. Wrapper for VkCommandBufferInheritanceInfo
+ */
+class CommandBufferInheritanceInfo{
+    VkCommandBufferInheritanceInfo m_info;
+public:
+    /**
+     * Create default command buffer inheritance info.
+     * If the command buffer should be used during a renderpass, or an operation drawing into framebuffer, additional function calls are required before being usable.
+     */
+    CommandBufferInheritanceInfo();
+    
+    /**
+     * Set the renderpass and subpass in which the secondary framebuffer will be used
+     * @param pass the renderpass
+     * @param subpass_index index of subpass in which the buffer will be used
+     */
+    CommandBufferInheritanceInfo& setRenderPass(VkRenderPass pass, int subpass_index);
+
+    /**
+     * Set the framebuffer into which the buffer may draw.
+     * @param framebuffer the framebuffer
+     */
+    CommandBufferInheritanceInfo& setFramebuffer(VkFramebuffer framebuffer);
+
+    /**
+     * Set up occlusion query parameters for this command buffer.
+     * @param enable set occlusion query to enabled / disabled
+     * @param query_flags can be VK_QUERY_CONTROL_PRECISE_BIT or 0
+     * @param pipeline_stats logical or of flags starting with VK_QUERY_PIPELINE_STATISTIC_***
+     */
+    CommandBufferInheritanceInfo& useOcclusionQuery(bool enable, VkQueryControlFlags query_flags, VkQueryPipelineStatisticFlags pipeline_stats);
+
+    /**
+     * Return a const reference to internal data
+     */
+    operator const VkCommandBufferInheritanceInfo&() const;
+};
+
+
+
 
 /**
  * CommandBuffer
@@ -26,8 +68,19 @@ public:
      * @param usage accepted flags - most common VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, other VK_COMMAND_BUFFER_USAGE_***
      */
     void startRecordPrimary(VkCommandBufferUsageFlags usage = 0);
-    //End recording of the command buffer
+
+    /**
+     * Start recording a secondary command buffer
+     * @param inh_info the inheritance info of this buffer, specifies renderpass to use buffer in, framebuffer it can draw into, and more
+     * @param usage accepted flags - most common VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, other VK_COMMAND_BUFFER_USAGE_***
+     */
+    void startRecordSecondary(const VkCommandBufferInheritanceInfo& inh_info, VkCommandBufferUsageFlags usage = 0);
+
+    /**
+     * End recording this command buffer
+     */
     void endRecordPrimary();
+
     /**
      * Reset the command buffer
      * @param release_resources if true, all resources(memory) that the buffer occupied will be freed as well, otherwise the buffer can be recorded again into the same space

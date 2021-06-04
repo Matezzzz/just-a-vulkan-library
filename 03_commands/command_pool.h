@@ -52,6 +52,10 @@ public:
      * @param flags either 0 or combination of VK_COMMAND_POOL_CREATE_TRANSIENT_BIT, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT and VK_COMMAND_POOL_CREATE_PROTECTED_BIT
      */
     CommandPoolInfo(uint32_t queue_family_index, VkCommandPoolCreateFlags flags = 0);
+
+    /**
+     * Create the command pool
+     */
     CommandPool create() const;
 };
 

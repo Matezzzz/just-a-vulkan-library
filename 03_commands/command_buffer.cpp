@@ -6,6 +6,33 @@
 #include "../08_pipeline/pipeline.h"
 
 
+
+
+
+CommandBufferInheritanceInfo::CommandBufferInheritanceInfo() : m_info{VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO, nullptr, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, false, 0, 0}
+{}
+CommandBufferInheritanceInfo& CommandBufferInheritanceInfo::setRenderPass(VkRenderPass pass, int subpass_index){
+    m_info.renderPass = pass;
+    m_info.subpass = subpass_index;
+    return *this;
+}
+CommandBufferInheritanceInfo& CommandBufferInheritanceInfo::setFramebuffer(VkFramebuffer framebuffer){
+    m_info.framebuffer = framebuffer;
+    return *this;
+}
+CommandBufferInheritanceInfo& CommandBufferInheritanceInfo::useOcclusionQuery(bool enable, VkQueryControlFlags query_flags, VkQueryPipelineStatisticFlags pipeline_stats){
+    m_info.occlusionQueryEnable = enable;
+    m_info.queryFlags = query_flags;
+    m_info.pipelineStatistics = pipeline_stats;
+    return *this;
+}
+CommandBufferInheritanceInfo::operator const VkCommandBufferInheritanceInfo&() const{
+    return m_info;
+}
+
+
+
+
 CommandBuffer::CommandBuffer(VkCommandBuffer buffer) : m_buffer(buffer)
 {}
 void CommandBuffer::startRecordPrimary(VkCommandBufferUsageFlags usage){
@@ -14,6 +41,13 @@ void CommandBuffer::startRecordPrimary(VkCommandBufferUsageFlags usage){
     //begin recording the buffer
     VkResult result = vkBeginCommandBuffer(m_buffer, &begin_info);
     DEBUG_CHECK("Start primary command buffer recording", result)
+}
+void CommandBuffer::startRecordSecondary(const VkCommandBufferInheritanceInfo& inh_info, VkCommandBufferUsageFlags usage){
+    //create begin info with inheritance info included
+    VkCommandBufferBeginInfo begin_info{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, nullptr, usage, &inh_info};
+    //begin the recording
+    VkResult result = vkBeginCommandBuffer(m_buffer, &begin_info);
+    DEBUG_CHECK("Start secondary command buffer recording", result)
 }
 void CommandBuffer::endRecordPrimary(){
     //end recording the buffer
