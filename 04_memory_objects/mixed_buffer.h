@@ -176,6 +176,15 @@ public:
     MixedBufferData& write(const string& name, const vector<T>& val){
         return write(name, val.data(), val.size());
     }
+
+    /**
+     * Write data to variable with given name
+     * @param val the value to write
+     */
+    template<typename T>
+    MixedBufferData& write(const string& name, T val){
+        return write(name, &val, 1);
+    }
 };
 
 
