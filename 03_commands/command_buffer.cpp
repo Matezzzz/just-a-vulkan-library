@@ -114,6 +114,13 @@ void CommandBuffer::cmdClearColor(const Image& image, ImageState state, VkClearC
     //record filling the image with color
     vkCmdClearColorImage(m_buffer, image, state.layout, &color, 1, &range);
 }
+void CommandBuffer::cmdExecuteCommands(VkCommandBuffer buffer){
+    cmdExecuteCommands(&buffer, 1);
+}
+void CommandBuffer::cmdExecuteCommands(const VkCommandBuffer* buffers, uint32_t count){
+    //execute all buffers
+    vkCmdExecuteCommands(m_buffer, count, buffers);
+}
 void CommandBuffer::cmdBeginRenderPass(RenderPassSettings& settings, VkRenderPass render_pass, VkFramebuffer framebuffer){
     //INLINE - renderpass contains no secondary command buffers
     vkCmdBeginRenderPass(m_buffer, &settings.getBeginInfo(render_pass, framebuffer), VK_SUBPASS_CONTENTS_INLINE);

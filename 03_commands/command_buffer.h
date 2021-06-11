@@ -120,6 +120,19 @@ public:
     void cmdClearColor(const Image& image, ImageState state, VkClearColorValue color);
 
     /**
+     * Execute given secondary command buffer
+     * @param buffer the buffer to execute
+     */
+    void cmdExecuteCommands(const VkCommandBuffer buffer);
+    
+    /**
+     * Execute given secondary command buffers.
+     * @param buffers array of buffers to execute
+     * @param count how many buffers are in the array
+     */
+    void cmdExecuteCommands(const VkCommandBuffer* buffers, uint32_t count);
+
+    /**
      * Copy data from one buffer to another
      * @param from source buffer
      * @param to target buffer
