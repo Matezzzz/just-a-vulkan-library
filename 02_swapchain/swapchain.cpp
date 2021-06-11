@@ -37,7 +37,7 @@ SwapchainImage Swapchain::acquireImage(){
     //call vulkan func to retrieve index of image that can be used
     uint32_t image_index;
 
-    m_image_acquire_fence.reset();
+    //m_image_acquire_fence.reset();
     //wait 10us for image to be available, if none is 
     VkResult result = vkAcquireNextImageKHR(m_device, m_swapchain, SYNC_10US, VK_NULL_HANDLE, m_image_acquire_fence, &image_index);
     //if image was succesfully returned, return it
@@ -52,6 +52,13 @@ SwapchainImage Swapchain::acquireImage(){
     //if no images are ready yet
     PRINT_WARN("No image is ready to be acquired")
     return SwapchainImage{};
+}
+void Swapchain::prepareToDraw(){
+    if (m_image_acquire_fence.waitFor(SYNC_FRAME)){
+        m_image_acquire_fence.reset();
+    }else{
+        PRINT_ERROR("No image available for the next frame");
+    }
 }
 void Swapchain::presentImage(const SwapchainImage& img, const Queue& queue){
     //fill image present info

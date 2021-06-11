@@ -56,6 +56,8 @@ public:
     //Acquire an image to draw into. By default, all images represented by handles in swapchain are under vulkan's control, this makes vulkan turn one of them over to the program.
     SwapchainImage acquireImage();
 
+    void prepareToDraw();
+
     //Use given queue to present given image to the screen. Queue must support image presentation.
     void presentImage(const SwapchainImage& img, const Queue& queue);
 
