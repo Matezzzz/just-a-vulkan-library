@@ -69,7 +69,7 @@ vector<VkPushConstantRange> PushConstantLayout::getPushConstantRanges() const{
     vector<VkPushConstantRange> ranges;
     ranges.reserve(size());
     for (uint32_t i = 0; i < size(); i++){
-        ranges.push_back(VkPushConstantRange{m_stage_flags[i], (*this)[i].offset, (*this)[i].size()});
+        ranges.push_back(VkPushConstantRange{m_stage_flags[i], (*this)[i].offset, roundUpToMemoryBlock((*this)[i].size(), 4U)});
     }
     return ranges;
 }

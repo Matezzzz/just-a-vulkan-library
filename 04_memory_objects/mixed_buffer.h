@@ -7,10 +7,24 @@
 
 using std::vector;
 
-//round value size to the next multiple of block_size
-uint64_t roundUpToMemoryBlock(uint64_t size, uint64_t block_size);
+
 //round value size to the previous multiple of block size
-uint64_t roundDownToMemoryBlock(uint64_t size, uint64_t block_size);
+template<typename T>
+T roundDownToMemoryBlock(T size, T block_size){
+    //(size % block_size) computes offset from current block start
+    //subtract offset from size and return
+    return size - (size % block_size);
+}
+
+//round value size to the next multiple of block_size
+template<typename T>
+T roundUpToMemoryBlock(T size, T block_size){
+    //compute value surely in the next block
+    T a = size + block_size - 1;
+    //round value to the start of block - start of next block has to be end of current one
+    return roundDownToMemoryBlock(a, block_size);
+}
+
 
 
 #define OFFSET_NOT_SPECIFIED (~0U)

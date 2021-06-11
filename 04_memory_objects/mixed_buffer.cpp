@@ -1,17 +1,6 @@
 #include "mixed_buffer.h"
 
 
-uint64_t roundUpToMemoryBlock(uint64_t size, uint64_t block_size){
-    //compute value surely in the next block
-    uint64_t a = size + block_size - 1;
-    //round value to the start of block - start of next block has to be end of current one
-    return roundDownToMemoryBlock(a, block_size);
-}
-uint64_t roundDownToMemoryBlock(uint64_t size, uint64_t block_size){
-    //(size % block_size) computes offset from current block start
-    //subtract offset from size and return
-    return size - (size % block_size);
-}
 
 
 
