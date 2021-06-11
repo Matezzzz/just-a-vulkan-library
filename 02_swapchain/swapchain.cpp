@@ -36,8 +36,10 @@ Swapchain::Swapchain(VkSwapchainKHR swapchain, const ImageInfo& image_info) :
 SwapchainImage Swapchain::acquireImage(){
     //call vulkan func to retrieve index of image that can be used
     uint32_t image_index;
+
+    m_image_acquire_fence.reset();
     //wait 10us for image to be available, if none is 
-    VkResult result = vkAcquireNextImageKHR(m_device, m_swapchain, SYNC_10US, VK_NULL_HANDLE, VK_NULL_HANDLE, &image_index);
+    VkResult result = vkAcquireNextImageKHR(m_device, m_swapchain, SYNC_10US, VK_NULL_HANDLE, m_image_acquire_fence, &image_index);
     //if image was succesfully returned, return it
     if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR){
         return SwapchainImage{Image{m_images[image_index], m_swapchain_image_info}, m_framebuffers[image_index], image_index};
