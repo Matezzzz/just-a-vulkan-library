@@ -22,7 +22,7 @@ for (Vk##type name : m_##name##s){              \
 
 
 VulkanAllocator::VulkanAllocator(VkDevice device, VkPhysicalDevice physical_device) : 
-    m_device(device)
+    m_device(device), m_physical_device(physical_device)
 {
     //get device properties, then save device limits from them
     VkPhysicalDeviceProperties properties;
@@ -102,6 +102,10 @@ const VkPhysicalDeviceLimits& VulkanAllocator::getLimits() const{
 VkDevice VulkanAllocator::getDevice() const{
     return m_device;
 }
+VkPhysicalDevice VulkanAllocator::getPhysicalDevice() const{
+    return m_physical_device;
+}
+
 
 void VulkanAllocator::destroy()
 {

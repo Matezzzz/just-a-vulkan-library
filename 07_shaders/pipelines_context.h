@@ -200,10 +200,10 @@ private:
                     info.imageInfo(), info.bufferInfo(), nullptr
                 };
             }else{
-                PRINT_ERROR(info.getName() << ": Attempt to write descriptor of invalid type.")
+                PRINT_ERROR(info.getName() << ": Attempt to write descriptor of invalid type")
             }
         }else{
-            PRINT_ERROR(info.getName() << ": Descriptor of given name not found.")
+            PRINT_ERROR(info.getName() << ": Descriptor of given name not found")
         }
     }
 };

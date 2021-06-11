@@ -40,6 +40,8 @@ class Device;
 class VulkanAllocator
 {
     VkDevice m_device;
+    VkPhysicalDevice m_physical_device;
+ 
     //Two different variables, each one holds some properties of the device
     VkPhysicalDeviceMemoryProperties m_memory_properties;
     VkPhysicalDeviceLimits m_device_limits;
@@ -86,8 +88,11 @@ public:
     //Create swapchain
     VkSwapchainKHR createSwapchain(const VkSwapchainCreateInfoKHR& info);
 
-    //Get handle to device
+    //Get a handle to device
     VkDevice getDevice() const;
+
+    //Get a handle to physical device
+    VkPhysicalDevice getPhysicalDevice() const;
 
     //Get a reference to device limits
     const VkPhysicalDeviceLimits& getLimits() const;
