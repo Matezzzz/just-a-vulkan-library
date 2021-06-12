@@ -179,7 +179,9 @@ PushConstantData::PushConstantData(const PushConstantLayout& layout) : MixedBuff
 VkShaderStageFlags PushConstantData::getStages() const {
     return m_stages;
 }
-
+uint32_t PushConstantData::size() const{
+    return roundUpToMemoryBlock(MixedBufferData::size(), 4ULL);
+}
 
 
 

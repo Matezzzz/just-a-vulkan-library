@@ -283,6 +283,7 @@ class PushConstantData : public MixedBufferData{
 public:
     PushConstantData(const PushConstantLayout& layout);
     VkShaderStageFlags getStages() const;
+    uint32_t size() const;
 };
 
 
