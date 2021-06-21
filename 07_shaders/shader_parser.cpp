@@ -174,7 +174,7 @@ uint32_t ShaderDataDescriptorSet::find(const string& descriptor_name) const{
         if (getDescriptor(i).getName() == descriptor_name) return i;
     }
     //if name couldn't be found, print error
-    PRINT_ERROR("Descriptor of name '" << descriptor_name << "' couldn't be found in the given set.")
+    PRINT_ERROR("Descriptor of name '" << descriptor_name << "' couldn't be found in the given set")
     return (NPOS_32BIT);
 }
 UniformBufferData ShaderDataDescriptorSet::createUniformBufferData(uint32_t b){
