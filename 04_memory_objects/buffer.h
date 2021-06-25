@@ -5,6 +5,34 @@
 #include "mixed_buffer.h"
 
 
+enum BufferStatesEnum{
+    BUFFER_INVALID,
+    BUFFER_NEWLY_CREATED,
+    BUFFER_STORAGE_R,
+    BUFFER_STORAGE_W,
+    BUFFER_STORAGE_RW
+};
+constexpr VkAccessFlags buffer_states_accesses[]{
+    0,
+    0,
+    VK_ACCESS_SHADER_READ_BIT,
+    VK_ACCESS_SHADER_WRITE_BIT,
+    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+};
+
+
+class BufferState{
+public:
+    VkAccessFlags access;
+
+    BufferState(BufferStatesEnum state) : access(buffer_states_accesses[state])
+    {}
+    BufferState(VkAccessFlags access_) : access(access_)
+    {}
+};
+
+
+
 /**
  * Buffer
  *  - manages one VkBuffer

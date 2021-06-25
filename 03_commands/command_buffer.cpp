@@ -58,6 +58,13 @@ void CommandBuffer::resetBuffer(bool release_resources){
     VkResult result = vkResetCommandBuffer(m_buffer, release_resources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);
     DEBUG_CHECK("Reset command buffer", result)
 }
+void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const VkBufferMemoryBarrier& memory_barrier){
+    //record buffer memory barriers
+    vkCmdPipelineBarrier(m_buffer, past_stages, next_stages, 0,
+        0, nullptr,     //no memory barriers
+        1, &memory_barrier, 
+        0, nullptr);    //no image barriers
+}
 void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkBufferMemoryBarrier>& memory_barriers){
     //record buffer memory barriers
     vkCmdPipelineBarrier(m_buffer, past_stages, next_stages, 0,

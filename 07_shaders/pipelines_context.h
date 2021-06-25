@@ -29,7 +29,11 @@ class DescriptorUpdateInfo{
     DescriptorUpdateInfoType m_type;
 
     //VkDescriptorImageInfo or VkDescriptorBufferInfo based on descriptor type
-    void* m_info = nullptr;
+    union{
+        VkDescriptorImageInfo* image;
+        VkDescriptorBufferInfo* buffer;
+        void* copied;   //used for cleaner code in copy constructor
+    } m_info;
 
     VkDescriptorType m_vulkan_type;
 public:
@@ -48,9 +52,11 @@ public:
     VkDescriptorType getType() const;
 
     //return image info if descriptor being updated is an image, otherwise return nullptr
-    const VkDescriptorImageInfo* imageInfo() const;
+    VkDescriptorImageInfo* imageInfo();
+    const VkDescriptorImageInfo* imageInfo() const;    
 
     //return buffer info if descriptor being updated is a buffer, otherwise return nullptr
+    VkDescriptorBufferInfo* bufferInfo();
     const VkDescriptorBufferInfo* bufferInfo() const;
 private:
     //create a copy of m_info and return a pointer to it

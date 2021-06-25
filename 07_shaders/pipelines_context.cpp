@@ -5,18 +5,18 @@
 
 
 DescriptorUpdateInfo::DescriptorUpdateInfo(const string& name, VkDescriptorType type, VkImageLayout layout, VkImageView image, VkSampler sampler) :
-    m_name{name}, m_type(UPDATE_INFO_IMAGE), m_info(new VkDescriptorImageInfo{sampler, image, layout}), m_vulkan_type(type)
+    m_name{name}, m_type(UPDATE_INFO_IMAGE), m_info{.image=new VkDescriptorImageInfo{sampler, image, layout}}, m_vulkan_type(type)
 {}
 DescriptorUpdateInfo::DescriptorUpdateInfo(const string& name, VkDescriptorType type, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range) :
-    m_name{name}, m_type(UPDATE_INFO_BUFFER), m_info(new VkDescriptorBufferInfo{buffer, offset, range}), m_vulkan_type(type)
+    m_name{name}, m_type(UPDATE_INFO_BUFFER), m_info{.buffer=new VkDescriptorBufferInfo{buffer, offset, range}}, m_vulkan_type(type)
 {}
 DescriptorUpdateInfo::DescriptorUpdateInfo(const DescriptorUpdateInfo& i) :
-    m_name{i.m_name}, m_type{i.m_type}, m_info{i.copyInfo()}, m_vulkan_type{i.m_vulkan_type}
+    m_name{i.m_name}, m_type{i.m_type}, m_info{.copied=i.copyInfo()}, m_vulkan_type{i.m_vulkan_type}
 {}
 DescriptorUpdateInfo& DescriptorUpdateInfo::operator=(const DescriptorUpdateInfo& i){
     m_name = i.m_name;
     m_type = i.m_type;
-    m_info = i.copyInfo();
+    m_info.copied = i.copyInfo();
     m_vulkan_type = i.m_vulkan_type;
     return *this;
 }
@@ -37,21 +37,31 @@ const string& DescriptorUpdateInfo::getName() const{
 VkDescriptorType DescriptorUpdateInfo::getType() const{
     return m_vulkan_type;
 }
+VkDescriptorImageInfo* DescriptorUpdateInfo::imageInfo(){
+    //return ptr if updating image, otherwise nullptr
+    if (isImage()) return m_info.image;
+    return nullptr;
+}
 const VkDescriptorImageInfo* DescriptorUpdateInfo::imageInfo() const{
     //return ptr if updating image, otherwise nullptr
-    if (isImage()) return reinterpret_cast<VkDescriptorImageInfo*>(m_info);
+    if (isImage()) return m_info.image;
+    return nullptr;
+}
+VkDescriptorBufferInfo* DescriptorUpdateInfo::bufferInfo(){
+    //return ptr if updating buffer, otherwise nullptr
+    if (!isImage()) return m_info.buffer;
     return nullptr;
 }
 const VkDescriptorBufferInfo* DescriptorUpdateInfo::bufferInfo() const{
     //return ptr if updating buffer, otherwise nullptr
-    if (!isImage()) return reinterpret_cast<VkDescriptorBufferInfo*>(m_info);
+    if (!isImage()) return m_info.buffer;
     return nullptr;
 }
 void* DescriptorUpdateInfo::copyInfo() const{
     if (m_type == UPDATE_INFO_IMAGE){
-        return (void*) new VkDescriptorImageInfo(* (VkDescriptorImageInfo*) m_info);
+        return (void*) new VkDescriptorImageInfo(*m_info.image);
     }
-    return (void*) new VkDescriptorBufferInfo(* (VkDescriptorBufferInfo*) m_info);
+    return (void*) new VkDescriptorBufferInfo(*m_info.buffer);
 }
 
 

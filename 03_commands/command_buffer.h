@@ -87,8 +87,18 @@ public:
      */
     void resetBuffer(bool release_resources);
 
+
+
     /**
-     * Insert given memory barriers into the buffer.
+     * Insert given buffer memory barrier into the buffer.
+     * @param past_stages the stage that has to be finished for the memory barrier to execute
+     * @param next_stages the stage at which the barrier will wait for past_stages to finish
+     * @param barrier the memory barrier to insert
+     */
+    void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const VkBufferMemoryBarrier& memory_barrier);
+
+    /**
+     * Insert given buffer memory barriers into the buffer.
      * @param past_stages the stage that has to be finished for the memory barrier to execute
      * @param next_stages the stage at which the barrier will wait for past_stages to finish
      * @param memory_barriers the memory barriers to insert
@@ -96,7 +106,7 @@ public:
     void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const vector<VkBufferMemoryBarrier>& memory_barriers);
     
     /**
-     * Insert given memory barrier into the buffer.
+     * Insert given image memory barrier into the buffer.
      * @param past_stages the stage that has to be finished for the memory barrier to execute
      * @param next_stages the stage at which the barrier will wait for past_stages to finish
      * @param barrier the memory barrier to insert
@@ -104,7 +114,7 @@ public:
     void cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStageFlags next_stages, const VkImageMemoryBarrier& barrier);
 
     /**
-     * Insert given memory barriers into the buffer.
+     * Insert given image memory barriers into the buffer.
      * @param past_stages the stage that has to be finished for the memory barrier to execute
      * @param next_stages the stage at which the barrier will wait for past_stages to finish
      * @param memory_barriers the memory barriers specifying which images the memory barriers are bound to, and how to change layouts and access flags of each image
