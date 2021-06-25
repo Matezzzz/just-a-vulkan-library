@@ -161,7 +161,7 @@ public:
 
 /**
  * ExtImage
- *  - Holds an image and it's view
+ *  - Holds an image and its' view
  */
 class ExtImage : public Image{
     ImageView m_view;
