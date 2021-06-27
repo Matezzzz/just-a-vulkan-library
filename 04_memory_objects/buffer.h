@@ -25,10 +25,13 @@ class BufferState{
 public:
     VkAccessFlags access;
 
+    BufferState() : access(0)
+    {}
+
     BufferState(BufferStatesEnum state) : access(buffer_states_accesses[state])
     {}
-    BufferState(VkAccessFlags access_) : access(access_)
-    {}
+    /*BufferState(VkAccessFlags access_) : access(access_)
+    {}*/
 };
 
 

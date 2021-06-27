@@ -38,9 +38,10 @@ enum DescriptorQualifier{
     QUALIFIER_WRITE_ONLY,
     QUALIFIER_READ_ONLY,
     QUALIFIER_RESTRICT,
+    QUALIFIER_COHERENT,
     QUALIFIER_UNRECOGNIZED
 };
-const vector<string> DESCRIPTOR_QUALIFIER_NAMES{"writeonly", "readonly", "restrict"};
+const vector<string> DESCRIPTOR_QUALIFIER_NAMES{"writeonly", "readonly", "restrict", "coherent"};
 
 
 /**
