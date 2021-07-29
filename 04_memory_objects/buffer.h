@@ -8,6 +8,7 @@
 enum BufferStatesEnum{
     BUFFER_INVALID,
     BUFFER_NEWLY_CREATED,
+    BUFFER_UNIFORM,
     BUFFER_STORAGE_R,
     BUFFER_STORAGE_W,
     BUFFER_STORAGE_RW
@@ -15,6 +16,7 @@ enum BufferStatesEnum{
 constexpr VkAccessFlags buffer_states_accesses[]{
     0,
     0,
+    VK_ACCESS_SHADER_READ_BIT,
     VK_ACCESS_SHADER_READ_BIT,
     VK_ACCESS_SHADER_WRITE_BIT,
     VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
