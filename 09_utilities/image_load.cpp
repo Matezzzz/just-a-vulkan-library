@@ -54,18 +54,9 @@ ImageSetOptions& ImageSetOptions::add(ImageType type, const string& filename){
 
 
 
-ImageSet::ImageSet(LocalObjectCreator& object_creator, const ImageSetOptions& options) : vector<ImageTexture>(options.size()){
+ImageSet::ImageSet(LocalObjectCreator& object_creator, const ImageSetOptions& options){
+    reserve(options.size());
     createImages(object_creator, options);
-}
-Image& ImageSet::getImage(uint32_t i){
-    return (*this)[i].image;
-}
-ImageView& ImageSet::getImageView(uint32_t i){
-    //get image view reference
-    ImageView& img = (*this)[i].image_view;
-    //if it hasn't been created yet, create it
-    if (img == VK_NULL_HANDLE) img = getImage(i).createView();
-    return img;
 }
 const VkFormat image_formats[]{VK_FORMAT_UNDEFINED, VK_FORMAT_R8_UNORM, VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8A8_UNORM};
 void ImageSet::createImages(LocalObjectCreator& object_creator, const ImageSetOptions& options){
@@ -81,14 +72,14 @@ void ImageSet::createImages(LocalObjectCreator& object_creator, const ImageSetOp
     
     //create vulkan image for each loaded image data
     for (uint32_t i = 0; i < image_count; i++){
-        getImage(i) = ImageInfo(image_data[i].width, image_data[i].height, image_formats[image_data[i].comp], VK_IMAGE_USAGE_SAMPLED_BIT).create();
+        push_back(ImageInfo(image_data[i].width, image_data[i].height, image_formats[image_data[i].comp], VK_IMAGE_USAGE_SAMPLED_BIT).create());
     }
     //allocate memory for all images
     m_memory = ImageMemoryObject(vectorOfImages(), VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     //copy loaded image data to each image
     for (uint32_t i = 0; i < image_count; i++){
-        object_creator.copyToLocal(image_data[i].data.data(), image_data[i].size(), getImage(i), ImageState{IMAGE_NEWLY_CREATED}, options.getState());
+        object_creator.copyToLocal(image_data[i].data.data(), image_data[i].size(), (*this)[i], ImageState{IMAGE_NEWLY_CREATED}, options.getState());
     }
 }
 vector<const Image*> ImageSet::vectorOfImages(){
@@ -96,7 +87,7 @@ vector<const Image*> ImageSet::vectorOfImages(){
     vector<const Image*> v(size());
     //go through all images and set a pointer for each one
     for (uint32_t i = 0; i < size(); i++){
-        v[i] = &getImage(i);
+        v[i] = &(*this)[i];
     }
     return v;
 }

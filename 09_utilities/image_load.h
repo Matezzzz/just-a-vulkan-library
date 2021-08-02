@@ -72,30 +72,17 @@ private:
 };
 
 
-/**
- * Holds an image and a view for it's whole area.
- */
-struct ImageTexture{
-    Image image;
-    ImageView image_view;
-};
-
-
 class LocalObjectCreator;
 
 /**
  * ImageSet
  *  - Load all images from ImageSetOptions given to constructor, then copy them to the GPU
  */
-class ImageSet : public vector<ImageTexture>{
+class ImageSet : public vector<ExtImage>{
     ImageMemoryObject m_memory;
 public:
     //load images from given options to the GPU
-    ImageSet(LocalObjectCreator& object_creator, const ImageSetOptions& options);\
-    //return image reference
-    Image& getImage(uint32_t i);
-    //return reference to image view, and create it, if it doesn't already exist
-    ImageView& getImageView(uint32_t i);  
+    ImageSet(LocalObjectCreator& object_creator, const ImageSetOptions& options);
 private:
     //create images on the GPU from given options
     void createImages(LocalObjectCreator& object_creator, const ImageSetOptions& options);
