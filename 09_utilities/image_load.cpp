@@ -10,6 +10,10 @@ ImageData::ImageData(const string& filename, uint32_t comp_c){
     stbi_set_flip_vertically_on_load(true);
     //load image with given filename using stb_image.h, save width, height and component count
     uint8_t* im_data = stbi_load(filename.c_str(), &width, &height, &comp, comp_c);
+    if (im_data == nullptr){
+        PRINT_ERROR("Image " << filename << " could not be loaded.")
+        return;
+    }
     //store image data as a vector to prevent bothering myself with having to delete pointer responsibly
     data = vector<uint8_t>(im_data, im_data+width*height*comp);
     //free image data
@@ -47,7 +51,7 @@ ImageState ImageSetOptions::getState() const{
 }
 ImageSetOptions& ImageSetOptions::add(ImageType type, const string& filename){
     //add given image info to the list. Filename is derived from (base name = directory + prefix)_(image name)
-    push_back(SetImageInfo{type, m_base_name + "_" + filename});
+    push_back(SetImageInfo{type, m_base_name + "/" + m_base_name + "_" + filename});
     return *this;
 }
 
@@ -64,10 +68,11 @@ void ImageSet::createImages(LocalObjectCreator& object_creator, const ImageSetOp
     uint32_t image_count = options.size();
     //reserve a vector for them
     vector<ImageData> image_data;
+    image_data.reserve(image_count);
 
     //load image from each info
     for (const SetImageInfo& info : options){
-        image_data.emplace_back(info.filename, getComponentCount(info.type));
+        image_data.push_back(ImageData{info.filename, getComponentCount(info.type)});
     }
     
     //create vulkan image for each loaded image data
