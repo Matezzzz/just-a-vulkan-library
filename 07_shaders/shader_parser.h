@@ -72,10 +72,10 @@ public:
     uint32_t find(const string& descriptor_name) const;
 
     //create uniform buffer data for descriptor with given binding
-    UniformBufferData createUniformBufferData(uint32_t binding);
+    UniformBufferLayoutData createUniformBufferData(uint32_t binding);
 
     //create uniform buffer data for descriptor of given name
-    UniformBufferData createUniformBufferData(const string& name);
+    UniformBufferLayoutData createUniformBufferData(const string& name);
 private:
     //return a reference to descriptor of given binding
     inline DescriptorData& getDescriptor(uint32_t binding_i);

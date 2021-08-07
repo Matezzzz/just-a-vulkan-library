@@ -177,10 +177,10 @@ uint32_t ShaderDataDescriptorSet::find(const string& descriptor_name) const{
     PRINT_ERROR("Descriptor of name '" << descriptor_name << "' couldn't be found in the given set")
     return (NPOS_32BIT);
 }
-UniformBufferData ShaderDataDescriptorSet::createUniformBufferData(uint32_t b){
+UniformBufferLayoutData ShaderDataDescriptorSet::createUniformBufferData(uint32_t b){
     if (!getDescriptor(b).isUniform()){
         PRINT_ERROR("Requesting subset variables data for non-uniform descriptor.")
-        return UniformBufferData();
+        return UniformBufferLayoutData();
     }
     //get ptr to subset variables
     const SubsetVariableVector* subset_variables = getDescriptor(b).getSubsetVariables();
@@ -191,9 +191,9 @@ UniformBufferData ShaderDataDescriptorSet::createUniformBufferData(uint32_t b){
         variables.push_back(BufferLayoutCreateType{var.name, var.type, var.count, var.offset});
     }
     //create mixed buffer data from given variables
-    return variables.create();
+    return UniformBufferLayoutData(variables.create());
 }
-UniformBufferData ShaderDataDescriptorSet::createUniformBufferData(const string& name){
+UniformBufferLayoutData ShaderDataDescriptorSet::createUniformBufferData(const string& name){
     return createUniformBufferData(find(name));
 }
 DescriptorData& ShaderDataDescriptorSet::getDescriptor(uint32_t binding_i){

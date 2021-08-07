@@ -184,13 +184,13 @@ SetVector::SetVector(Ts&... sets){
 
 
 
-PushConstantData::PushConstantData(const PushConstantLayout& layout) : MixedBufferData(layout), m_stages(layout.getAllStages())
+PushConstantData::PushConstantData(const PushConstantLayout& layout) : UniformBufferLayoutData(layout), m_stages(layout.getAllStages())
 {}
 VkShaderStageFlags PushConstantData::getStages() const {
     return m_stages;
 }
 uint32_t PushConstantData::size() const{
-    return roundUpToMemoryBlock(MixedBufferData::size(), 4ULL);
+    return roundUpToMemoryBlock(UniformBufferLayoutData::size(), 4ULL);
 }
 
 

@@ -283,7 +283,7 @@ private:
  * PushConstantData
  *  - Holds data for push constants. These can be written, then given to the gpu by calling cmdPushConstants on a command buffer
  */
-class PushConstantData : public MixedBufferData{
+class PushConstantData : public UniformBufferLayoutData{
     //stages, in which constants are used
     VkShaderStageFlags m_stages;
 public:
@@ -292,8 +292,6 @@ public:
     uint32_t size() const;
 };
 
-
-typedef MixedBufferData UniformBufferData;
 
 
 const uint32_t DESCRIPTOR_SET_SKIP = ~0U;

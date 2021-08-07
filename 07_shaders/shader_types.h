@@ -4,34 +4,33 @@
 #include "../00_base/vulkan_base.h"
 
 
-enum ShaderBasicType
+ enum ShaderBasicTypesEnum
 {
     SHADER_BOOL,
     SHADER_INT,
     SHADER_UINT,
     SHADER_FLOAT,
-    SHADER_DOUBLE
+    SHADER_DOUBLE,
+    SHADER_BASIC_TYPE_COUNT
 };
 
-
-constexpr uint32_t shader_basic_type_sizes[]{1, 4, 4, 4, 8};
-constexpr uint32_t sizeBytes(ShaderBasicType type)
-{
-    return shader_basic_type_sizes[type];
-}
-
-
-constexpr const char* shader_basic_type_names[]{"bool", "int", "uint", "float", "double"};
-constexpr const char* toString(ShaderBasicType type)
-{
-    return shader_basic_type_names[type];
-}
-
-constexpr ShaderBasicType getBasicType(bool) {return SHADER_BOOL;}
-constexpr ShaderBasicType getBasicType(int32_t) {return SHADER_INT;}
-constexpr ShaderBasicType getBasicType(uint32_t) {return SHADER_UINT;}
-constexpr ShaderBasicType getBasicType(float) {return SHADER_FLOAT;}
-constexpr ShaderBasicType getBasicType(double) {return SHADER_DOUBLE;}
+class ShaderBasicType{
+   
+    ShaderBasicTypesEnum m_type;
+    static constexpr uint32_t shader_basic_type_sizes[SHADER_BASIC_TYPE_COUNT]{1, 4, 4, 4, 8};
+    static constexpr const char* shader_basic_type_names[SHADER_BASIC_TYPE_COUNT]{"bool", "int", "uint", "float", "double"};
+public:
+    ShaderBasicType(ShaderBasicTypesEnum type);
+    ShaderBasicType(bool);
+    ShaderBasicType(int32_t);
+    ShaderBasicType(uint32_t);
+    ShaderBasicType(float);
+    ShaderBasicType(double);
+    uint32_t sizeBytes() const;
+    const char* toString() const;
+    bool operator==(ShaderBasicType t) const;
+    bool operator!=(ShaderBasicType t) const;
+};
 
 
 
@@ -96,7 +95,7 @@ constexpr uint32_t STD430Alignment(ShaderVariableType type)
 }
 
 
-constexpr ShaderBasicType shader_variable_type_basic_types[]
+const ShaderBasicType shader_variable_type_basic_types[]
 {
       SHADER_BOOL,   SHADER_BOOL,   SHADER_BOOL,   SHADER_BOOL,
        SHADER_INT,    SHADER_INT,    SHADER_INT,    SHADER_INT,
@@ -106,14 +105,8 @@ constexpr ShaderBasicType shader_variable_type_basic_types[]
      SHADER_FLOAT,  SHADER_FLOAT,  SHADER_FLOAT,
     SHADER_DOUBLE, SHADER_DOUBLE, SHADER_DOUBLE
 };
-constexpr ShaderBasicType basicType(ShaderVariableType type)
-{
-    return shader_variable_type_basic_types[type];
-}
-constexpr uint32_t sizeBytes(ShaderVariableType type)
-{
-    return sizeBytes(basicType(type)) * componentCount(type);
-}
+ShaderBasicType basicType(ShaderVariableType type);
+uint32_t sizeBytes(ShaderVariableType type);
 
 
 #endif
