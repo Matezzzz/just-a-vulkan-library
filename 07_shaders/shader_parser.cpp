@@ -332,10 +332,11 @@ void ShaderDataInfo::parseShaderLine(parse::string_view line){
     return;
 }
 void ShaderDataInfo::readDescriptor(parse::string_view name_type, const DescriptorParameterVector& parameters, bool is_storage_buffer){
+    bool is_push_constant = parameters.exists("push_constant");
     //create descriptor data from given parameters
-    DescriptorData descriptor_data{name_type, parameters, is_storage_buffer, m_stage};
+    DescriptorData descriptor_data{name_type, parameters, is_storage_buffer, m_stage, is_push_constant};
     //if created descriptor represents a push constant, this can be found in parameters, convert it to push constant
-    if (parameters.exists("push_constant")){
+    if (is_push_constant){
         m_push_constants.addPushConstants(descriptor_data.convertToPushConstant(), m_stage);
         return;
     }

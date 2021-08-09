@@ -136,7 +136,7 @@ class DescriptorData{
     //if descriptor is an array, number of elements
     uint32_t m_count;
     //Additional data for specific descriptor types - is pointer to BufferUniformDescriptorData if type is UNIFORM_BUFFER or STORAGE_BUFFER, and to InputAttachmentData in case of INPUT_ATTACHMEMT type
-    void* m_additional_data;
+    void* m_additional_data = nullptr;
     //Qualifiers - whether descriptor is write-only, read-only, ...
     vector<DescriptorQualifier> m_qualifiers;
 public:
@@ -144,7 +144,7 @@ public:
     DescriptorData();
     
     //Construct descriptor data from given info
-    DescriptorData(parse::string_view name_type_info, const DescriptorParameterVector& parameters, bool is_storage_buffer, VkShaderStageFlags stage);
+    DescriptorData(parse::string_view name_type_info, const DescriptorParameterVector& parameters, bool is_storage_buffer, VkShaderStageFlags stage, bool is_push_constant);
     
     DescriptorData(const DescriptorData& d);
     DescriptorData& operator=(const DescriptorData& d);
@@ -172,11 +172,11 @@ public:
     bool isUniform() const;
     bool isInputAttachment() const;
 
-    //only valid for uniform buffer, return pointer to SubsetVariableVector, return nullptr in case descriptor isn't uniform or storage buffer
-    const SubsetVariableVector* getSubsetVariables() const;
 
     //only valid for input attachment, return pointer to InputAttachmentDescriptorData, return nullptr in case descriptor isn't uniform or storage buffer
     const InputAttachmentDescriptorData* getInputAttachmentData() const;
+
+    const SubsetVariableVector* getSubsetVariables() const;
 };
 
 #endif

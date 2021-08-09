@@ -99,7 +99,7 @@ uint32_t DescriptorParameterVector::readInt(parse::string_view v){
 
 DescriptorData::DescriptorData() : m_set(INVALID_SET)
 {}
-DescriptorData::DescriptorData(parse::string_view name_type_info, const DescriptorParameterVector& parameters, bool is_storage_buffer, VkShaderStageFlags stage) : 
+DescriptorData::DescriptorData(parse::string_view name_type_info, const DescriptorParameterVector& parameters, bool is_storage_buffer, VkShaderStageFlags stage, bool is_push_constant) : 
     m_set(parameters.get("set")), m_binding(parameters.get("binding")), m_stage(stage)
 {
     //current parsing phase. Parameters have been read already, the string is in format 'qualifiers type name', e.g. 'writeonly image2D vel_y_2_out' 
@@ -122,10 +122,7 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
         if (read_phase == PHASE_READ_TYPE){
             //read array length from given string
             m_count = ShaderParseUtils::readDescriptorCount(word);
-            //if type is uniform buffer or storage buffer, read subset variables, these are after type but before name
-            /*if (m_type == TYPE_UNIFORM_BUFFER || m_type == TYPE_STORAGE_BUFFER){
-                m_additional_data = new SubsetVariableVector(ShaderParseUtils::readSubsetVariablesData(word));
-            }*/
+            
             uint32_t offset = 0; uint32_t offset2 = 0;
             //get name - part of word before both { and [
             m_name = word.getUntilChar(offset, '[', true).getUntilChar(offset2, '{', true);
@@ -146,7 +143,7 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
                     //choose type between TYPE_STORAGE_BUFFER and TYPE_UNIFORM_BUFFER, this is decided by factors outside of currently parsed string, is given as a parameter
                     m_type = is_storage_buffer ? TYPE_STORAGE_BUFFER : TYPE_UNIFORM_BUFFER;
                     //read subset variables of buffer
-                    m_additional_data = new SubsetVariableVector(ShaderParseUtils::readSubsetVariablesData(word));
+                    if (is_push_constant) m_additional_data = new SubsetVariableVector(ShaderParseUtils::readSubsetVariablesData(word));
                     //for uniform and storage buffers, name is part of current word as well, read it
                     uint32_t offset = 0;
                     m_name = word.getUntilChar(offset, '{');
@@ -169,25 +166,25 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
 
 DescriptorData::DescriptorData(const DescriptorData& d) : m_set(d.m_set), m_binding(d.m_binding), m_stage(d.m_stage), m_type(d.m_type), m_name(d.m_name), m_count(d.m_count){
     //copy additional data based on descriptor type
-    if (isUniform()){
-        m_additional_data = new SubsetVariableVector(*d.getSubsetVariables());
+    if (d.m_additional_data == nullptr){
+        m_additional_data = nullptr;
     }
     else if (isInputAttachment()){
         m_additional_data = new InputAttachmentDescriptorData(*d.getInputAttachmentData());
     }else{
-        m_additional_data = nullptr;
+        m_additional_data = new SubsetVariableVector(*d.getSubsetVariables());
     }
 }
 DescriptorData& DescriptorData::operator=(const DescriptorData& d){
     m_set = d.m_set; m_binding = d.m_binding; m_type = d.m_type; m_name = d.m_name; m_count = d.m_count; m_stage = d.m_stage;
     //copy additional data based on descriptor type
-    if (isUniform()){
-        m_additional_data = new SubsetVariableVector(*d.getSubsetVariables());
+    if (d.m_additional_data == nullptr){
+        m_additional_data = nullptr;
     }
-    else if (isInputAttachment()){
+    else if (d.isInputAttachment()){
         m_additional_data = new InputAttachmentDescriptorData(*d.getInputAttachmentData());
     }else{
-        m_additional_data = nullptr;
+        m_additional_data = new SubsetVariableVector(*d.getSubsetVariables());
     }
     return *this;
 }
@@ -195,7 +192,7 @@ bool DescriptorData::operator==(const DescriptorData& d) const{
     //if type, count, and name are the same
     if (m_type == d.m_type && m_count == d.m_count && m_name == d.m_name){
         //if descriptor is an uniform, check subset variables for equality, else return true
-        if (isUniform()){
+        if (m_additional_data != nullptr && isUniform()){
             if (*getSubsetVariables() == *d.getSubsetVariables()){
                 return true;
             }else{
@@ -224,7 +221,7 @@ string DescriptorData::str() const{
     if (m_type == TYPE_INPUT_ATTACHMENT) ss << ", input_attachment_index = " << getInputAttachmentData()->input_attachment_index;
     ss << ") " << ((m_type == TYPE_STORAGE_BUFFER) ? "buffer" : "uniform");
     ss << " " << descriptorName(m_type);
-    if (m_type == TYPE_UNIFORM_BUFFER) ss << "{" << getSubsetVariables()->str() << "}";
+    if (m_additional_data != nullptr && isUniform()) ss << "{" << getSubsetVariables()->str() << "}";
     ss << " " << m_name << ";";
     return ss.str();
 }
