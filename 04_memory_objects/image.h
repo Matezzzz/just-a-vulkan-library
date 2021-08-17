@@ -64,7 +64,8 @@ public:
     VkImageLayout layout;
     VkAccessFlags access;
     
-    ImageState(VkImageLayout layout_, VkAccessFlags access_);
+    ImageState();
+    ImageState(VkImageLayout layout, VkAccessFlags access);
     ImageState(ImageStatesEnum s);
     bool operator==(const ImageState& s);
     bool operator!=(const ImageState& s);

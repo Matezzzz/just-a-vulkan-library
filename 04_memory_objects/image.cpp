@@ -27,7 +27,8 @@ uint8_t Format::getSize() const{
 
 
 
-
+ImageState::ImageState() : ImageState(IMAGE_NEWLY_CREATED)
+{}
 ImageState::ImageState(VkImageLayout layout_, VkAccessFlags access_) :
     layout(layout_), access(access_)
 {}
