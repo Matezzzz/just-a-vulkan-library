@@ -147,7 +147,7 @@ public:
 
 class UniformBufferRawData : public UniformBufferData{
 protected:
-    uint32_t m_write_offset;
+    uint32_t m_write_offset = 0;
 public:
     template<typename T>
     UniformBufferRawData& write(const T* val, uint32_t data_len_elements){

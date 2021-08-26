@@ -3,6 +3,7 @@
 
 #include "../00_base/vulkan_base.h"
 #include "image.h"
+#include <glm/glm.hpp>
 
 /**
  * ImageInfo
@@ -47,6 +48,29 @@ public:
      * @param usage how the image will be used. Accepted values VK_IMAGE_USAGE_***
      */
     ImageInfo(uint32_t width, uint32_t height, uint32_t depth, VkFormat data_type, VkImageUsageFlags usage);
+
+    /**
+     * create 2D image. Default settings:
+     *  - no flags
+     *  - 1 mipmap level, 1 array level, 1 sample per pixel
+     *  - optimal tiling, exclusive sharing mode, undefined default layout
+     * @param size size in pixels
+     * @param data_type pixel format. Accepted values VK_FORMAT_***
+     * @param usage how the image will be used. Accepted values VK_IMAGE_USAGE_***
+     */
+    ImageInfo(const glm::uvec2& size, VkFormat data_type, VkImageUsageFlags usage);
+
+    /**
+     * create 3D image. Default settings:
+     *  - no flags
+     *  - 1 mipmap level, 1 array level, 1 sample per pixel
+     *  - optimal tiling, exclusive sharing mode, undefined default layout
+     * @param size size in pixels
+     * @param data_type pixel format. Accepted values VK_FORMAT_***
+     * @param usage how the image will be used. Accepted values VK_IMAGE_USAGE_***
+     */
+    ImageInfo(const glm::uvec3& size, VkFormat data_type, VkImageUsageFlags usage);
+
 
     /**
      * Set image creation flags

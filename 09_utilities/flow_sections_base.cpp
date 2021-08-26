@@ -56,7 +56,7 @@ bool FlowSectionDescriptorUsage::isImage() const{
 
 
 
-
+FlowDescriptorContext::FlowDescriptorContext(){}
 FlowDescriptorContext::FlowDescriptorContext(const vector<ExtImage>& images, const vector<Buffer>& buffers) :
     FlowDescriptorContext(images, vector<PipelineImageState>(images.size()), buffers, vector<PipelineBufferState>(buffers.size()))
 {}

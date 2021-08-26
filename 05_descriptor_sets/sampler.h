@@ -43,7 +43,7 @@ public:
     //texture coordinates will range from 0 to size of the image
     SamplerInfo& disableNormalizedCoordinates();
 
-    VkSampler create();
+    VkSampler create() const;
 };
 
 #endif

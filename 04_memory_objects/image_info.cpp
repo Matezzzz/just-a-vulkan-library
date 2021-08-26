@@ -17,6 +17,11 @@ ImageInfo::ImageInfo(uint32_t width, uint32_t height, uint32_t depth, VkFormat d
     : m_info{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr, 0, VK_IMAGE_TYPE_3D, data_format, {width, height, depth}, 1, 1, 
         VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, usage, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr, VK_IMAGE_LAYOUT_UNDEFINED}
 {}
+ImageInfo::ImageInfo(const glm::uvec2& size, VkFormat data_type, VkImageUsageFlags usage) : ImageInfo(size.x, size.y, data_type, usage)
+{}
+ImageInfo::ImageInfo(const glm::uvec3& size, VkFormat data_type, VkImageUsageFlags usage) : ImageInfo(size.x, size.y, size.z, data_type, usage)
+{}
+
 
 ImageInfo& ImageInfo::setFlags(VkImageCreateFlags flags){
     m_info.flags = flags;

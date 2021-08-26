@@ -57,7 +57,7 @@ SamplerInfo& SamplerInfo::disableNormalizedCoordinates(){
     m_info.unnormalizedCoordinates = true;
     return *this;
 }
-VkSampler SamplerInfo::create(){
+VkSampler SamplerInfo::create() const{
     return g_allocator.get().createSampler(m_info);
 }
 

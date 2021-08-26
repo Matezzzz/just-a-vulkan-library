@@ -92,11 +92,17 @@ class FlowDescriptorContext{
     vector<PipelineBufferState> m_buffer_states;
 public:
     /**
+     * Create FlowDescriptorContext without any descriptors.
+     */
+    FlowDescriptorContext();
+ 
+    /**
      * Create FlowDescriptorContext. All images and buffers are assumed to just have been created.
      * @param images all images to be used by flow sections
      * @param buffers all buffers to be used by flow sections
      */
     FlowDescriptorContext(const vector<ExtImage>& images, const vector<Buffer>& buffers);
+   
     /**
      * Create FlowDescriptorContext with given images, buffers and their respective states
      * @param images all images to be used by flow sections
