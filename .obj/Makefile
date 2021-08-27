@@ -22,10 +22,9 @@ shaders: $(SHADER_RESULT_FILES)
 
 
 ../libJAVL.a: $(OBJ_FILES)
-	@del ../libJAVL.a || rem
+	@del "..\\libJAVL.a" || rem
 	$(info Creating library: $@)
-	@ar rvs $@ $^
-#-o $@ $(LDFLAGS)
+	@ar rvs $@ $^ >nul 2>&1
 
 -include $(DEPENDENCY_FILES)
 
