@@ -159,6 +159,7 @@ public:
     UniformBufferRawData& write(const T* val){
         return write(val, data_len_elements);
     }
+    void resetOffset();
 };
 
 

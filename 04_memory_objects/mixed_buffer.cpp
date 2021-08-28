@@ -91,6 +91,9 @@ MixedBufferLayout BufferLayoutCreateTypeVector::create(uint32_t first_var_offset
 }
 
 
+void UniformBufferRawData::resetOffset(){
+    m_write_offset = 0;
+}
 
 vector<uint32_t> convertArrayOfBools(uint32_t len, const bool* data){
     vector<uint32_t> v;
