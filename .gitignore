@@ -1,9 +1,4 @@
 .VSCodeCounter/*
 .obj/*.d
 .obj/*.o
-.vscode/c_cpp_properties.json
-.vscode/launch.json
-.vscode/settings.json
-.vscode/tasks.json
-main.cpp
 libJAVL.a
