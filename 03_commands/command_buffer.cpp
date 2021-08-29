@@ -153,6 +153,12 @@ void CommandBuffer::cmdBindSets(const Pipeline& pipeline, const vector<VkDescrip
     //record binding given descriptor sets                                                     0 -> no offset                                    (0, nullptr) -> no dynamic offsets 
     vkCmdBindDescriptorSets(m_buffer, pipeline.getBindPoint(), pipeline.getLayout(), 0, descriptor_sets.size(), descriptor_sets.data(), 0, nullptr);
 }
+void CommandBuffer::cmdBindVertexBuffer(VkBuffer buffer, uint32_t binding_offset){
+    //offset in buffer
+    VkDeviceSize a = 0;
+    //bind given buffer
+    vkCmdBindVertexBuffers(m_buffer, binding_offset, 1, &buffer, &a);
+}
 void CommandBuffer::cmdBindVertexBuffers(vector<VkBuffer> buffers, uint32_t binding_offset){
     //record binding given buffers
     vector<VkDeviceSize> buffer_offsets(buffers.size(), 0);

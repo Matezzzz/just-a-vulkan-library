@@ -184,6 +184,14 @@ public:
     //Bind given descriptor sets for use with given pipeline 
     void cmdBindSets(const Pipeline& pipeline, const vector<VkDescriptorSet>& descriptor_sets);
     
+
+    /**
+     * Bind given vertex buffer
+     * @param buffer buffer to bind
+     * @param binding_offset offset into internal buffer array
+     */
+    void cmdBindVertexBuffer(VkBuffer buffer, uint32_t binding_offset = 0);
+
     /**
      * Bind given vertex buffers
      * @param buffers
