@@ -196,7 +196,7 @@ private:
         uint32_t descriptor_index = m_layout->find(info.getName());
         if (descriptor_index != NPOS_32BIT){
             //check whether shader descriptor type is of the same type as update info
-            VkDescriptorType shader_descriptor_type = vulkanDescriptorType((*m_layout)[descriptor_index].getType());
+            VkDescriptorType shader_descriptor_type = (*m_layout)[descriptor_index].getType().getVulkanDescriptorType();
             if (shader_descriptor_type == info.getType()){
                 //fill VkWriteDescriptorSet structure
                 write_info = VkWriteDescriptorSet{
@@ -220,8 +220,9 @@ private:
  * DescriptorSetCounter
  *  - counts how many times does each type of descriptor set apperar within the descriptor pool.
  */
+constexpr int VULKAN_DESCRIPTOR_SET_TYPE_COUNT = 11;
 class DescriptorSetCounter{
-    uint32_t m_descriptor_counts[11]{};
+    uint32_t m_descriptor_counts[VULKAN_DESCRIPTOR_SET_TYPE_COUNT]{};
 public:
     //add given count of descriptor type represented by data
     void addDescriptors(const DescriptorData& data, uint32_t descriptor_count);

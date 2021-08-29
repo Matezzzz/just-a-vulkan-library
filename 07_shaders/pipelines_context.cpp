@@ -125,15 +125,15 @@ void DescriptorSetCounter::addDescriptors(const DescriptorData& data, uint32_t d
     //if descriptor set is valid
     if (data.exists()){
         //register descriptors of given type if it's valid
-        if (data.getType() >= 0 && data.getType() < 11){
-            m_descriptor_counts[(int32_t) data.getType()] += descriptor_count;
+        if (!data.getType().isUndefined()){
+            m_descriptor_counts[(int32_t) data.getType().getVulkanDescriptorType()] += descriptor_count;
         }
     }
 }
 vector<VkDescriptorPoolSize> DescriptorSetCounter::getPoolSizes() const{
     //convert internal counts objects to vector of VkDescriptorPoolSize
     vector<VkDescriptorPoolSize> sizes;
-    for (uint32_t i = 0; i < 11; i++){
+    for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SET_TYPE_COUNT; i++){
         //if there are any descriptors of type, add them to the vector
         if (m_descriptor_counts[i]){
             sizes.push_back(VkDescriptorPoolSize{(VkDescriptorType) i, m_descriptor_counts[i]});

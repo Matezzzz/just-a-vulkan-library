@@ -20,6 +20,8 @@ public:
     Vertices& add(const Vertices& v2);
 
     Vertices& add(const glm::vec3& v);
+
+    Vertices& addCoordinate(uint32_t current_coordinate_count, uint32_t insert_pos, float new_coord_value = 0.f);
 };
 
 
@@ -49,8 +51,6 @@ public:
     static Vertices screenQuadTexCoords();
 
     static Vertices unitSphere(uint32_t angle_subdivisions, uint32_t height_subidivions);
-private:
-    static glm::vec3 getUnitSphereVertex(float w, float a);
 };
 
 

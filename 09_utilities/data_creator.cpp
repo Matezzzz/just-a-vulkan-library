@@ -1,5 +1,6 @@
 #include "data_creator.h"
 #include <cmath>
+#include "../00_base/vulkan_base.h"
 
 
 constexpr float PI = 3.1415926;
@@ -13,6 +14,18 @@ Vertices& Vertices::add(const glm::vec3& v){
     push_back(v.x); push_back(v.y); push_back(v.z);
     return *this;
 }
+Vertices& Vertices::addCoordinate(uint32_t current_coordinate_count, uint32_t insert_after_pos, float new_coord_value){
+    if (size() % current_coordinate_count) PRINT_ERROR("Current coordinate count does not divide total vertex count.")
+    Vertices new_vertices;
+    new_vertices.reserve(size() + size() / current_coordinate_count);
+    for (uint32_t i = 0; i < size(); i++){    
+        new_vertices.push_back((*this)[i]);
+        if (i % current_coordinate_count == insert_after_pos) new_vertices.push_back(new_coord_value);
+    }
+    *this = new_vertices;
+    return *this;
+}
+
 
 Vertices VertexCreator::createPlane(uint32_t x_count, uint32_t y_count, float x_offset, float y_offset, float x_scale, float y_scale){
     Vertices vertices;
@@ -68,35 +81,33 @@ Vertices VertexCreator::screenQuadTexCoords(){
     };
     return vertices;
 }
+
+
+
+glm::vec3 getUnitSphereVertex(float w, float a){
+    float r = sqrt(1 - w * w);
+    return glm::vec3(sinf(a)*r, w, cosf(a)*r);
+}
+float getW(uint32_t w, uint32_t height_subdivisions){
+    float wf = PI * w / height_subdivisions;
+    return cos(wf);
+}
+float getA(uint32_t a, uint32_t angle_subdivisions){
+    return 2 * PI * a / angle_subdivisions;
+}
 Vertices VertexCreator::unitSphere(uint32_t angle_subdivisions, uint32_t height_subidivions){
     Vertices vertices;
     vertices.reserve(angle_subdivisions * (2 * height_subidivions - 2) * 3);
     
-    for (uint32_t a = 0; a < angle_subdivisions; a++){
-        vertices.add(glm::vec3(0, -1, 0));
-        float w = -1 + 2.f / height_subidivions;
-        vertices.add(getUnitSphereVertex(w, 2 * PI * a / angle_subdivisions));
-        vertices.add(getUnitSphereVertex(w, 2 * PI * (a+1) / angle_subdivisions));
-    }
-    for (uint32_t h = 1; h < height_subidivions - 1; h++){
+    for (uint32_t h = 0; h <= height_subidivions; h++){
         for (uint32_t a = 0; a < angle_subdivisions; a++){
-            float w1 = -1 + 2.f * h / height_subidivions;
-            float w2 = -1 + 2.f * (h+1) / height_subidivions;
-            float a1 = 2 * PI * a / angle_subdivisions;
-            float a2 = 2 * PI * (a+1) / angle_subdivisions;
+            float w1 = getW(h, height_subidivions);
+            float w2 = getW(h+1, height_subidivions);
+            float a1 = getA(a, angle_subdivisions);
+            float a2 = getA(a+1, angle_subdivisions);
             vertices.add(getUnitSphereVertex(w1, a1)).add(getUnitSphereVertex(w1, a2)).add(getUnitSphereVertex(w2, a1))
-                    .add(getUnitSphereVertex(w1, a2)).add(getUnitSphereVertex(w1, a2)).add(getUnitSphereVertex(w2, a2)); 
+                    .add(getUnitSphereVertex(w1, a2)).add(getUnitSphereVertex(w2, a1)).add(getUnitSphereVertex(w2, a2)); 
         }
     }
-    for (uint32_t a = 0; a < angle_subdivisions; a++){
-        vertices.add(glm::vec3(0, 1, 0));
-        float w = 1 - 2.f / height_subidivions;
-        vertices.add(getUnitSphereVertex(w, 2 * PI * a / angle_subdivisions));
-        vertices.add(getUnitSphereVertex(w, 2 * PI * (a+1) / angle_subdivisions));
-    }
     return vertices;
-}
-glm::vec3 VertexCreator::getUnitSphereVertex(float w, float a){
-    float r = 1 - w * w;
-    return glm::vec3(sinf(a)*r, w, cosf(a)*r);
 }

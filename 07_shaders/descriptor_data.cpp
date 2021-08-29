@@ -137,11 +137,11 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
                 m_qualifiers.push_back(q);
             }else{
                 //if it isn't a qualifier, try reading it as a type
-                m_type = descriptorType(word);
+                m_type = DescriptorType(word);
                 //if it isn't a recognized type, it must be an uniform or storage buffer
-                if (m_type == TYPE_UNDEFINED){
+                if (m_type.isUndefined()){
                     //choose type between TYPE_STORAGE_BUFFER and TYPE_UNIFORM_BUFFER, this is decided by factors outside of currently parsed string, is given as a parameter
-                    m_type = is_storage_buffer ? TYPE_STORAGE_BUFFER : TYPE_UNIFORM_BUFFER;
+                    m_type = is_storage_buffer ? DescriptorType::TYPE_STORAGE_BUFFER : DescriptorType::TYPE_UNIFORM_BUFFER;
                     //read subset variables of buffer
                     if (is_push_constant) m_additional_data = new SubsetVariableVector(ShaderParseUtils::readSubsetVariablesData(word));
                     //for uniform and storage buffers, name is part of current word as well, read it
@@ -153,7 +153,7 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
                     m_count = 1;
                 }else{
                     //if type is input attachment, create additional data for it
-                    if (m_type == TYPE_INPUT_ATTACHMENT) m_additional_data = ShaderParseUtils::readInputAttachmentData(parameters);
+                    if (m_type.isInputAttachment()) m_additional_data = ShaderParseUtils::readInputAttachmentData(parameters);
                     //update phase
                     read_phase = PHASE_READ_TYPE;
                 }
@@ -218,15 +218,15 @@ string DescriptorData::str() const{
     //convert descriptor data to string, then return it. string should represent legal GLSL code used to instantiate this object.
     std::ostringstream ss;
     ss << "layout(set = " << m_set << ", binding = " << m_binding;
-    if (m_type == TYPE_INPUT_ATTACHMENT) ss << ", input_attachment_index = " << getInputAttachmentData()->input_attachment_index;
-    ss << ") " << ((m_type == TYPE_STORAGE_BUFFER) ? "buffer" : "uniform");
-    ss << " " << descriptorName(m_type);
+    if (m_type.isInputAttachment()) ss << ", input_attachment_index = " << getInputAttachmentData()->input_attachment_index;
+    ss << ") " << ((m_type.isStorageBuffer()) ? "buffer" : "uniform");
+    ss << " " << m_type.getString();
     if (m_additional_data != nullptr && isUniform()) ss << "{" << getSubsetVariables()->str() << "}";
     ss << " " << m_name << ";";
     return ss.str();
 }
-bool DescriptorData::isUniform() const {return (m_type == TYPE_UNIFORM_BUFFER || m_type == TYPE_STORAGE_BUFFER);}
-bool DescriptorData::isInputAttachment() const {return (m_type == TYPE_INPUT_ATTACHMENT);}
+bool DescriptorData::isUniform() const {return (m_type.isUniformBuffer() || m_type.isStorageBuffer());}
+bool DescriptorData::isInputAttachment() const {return (m_type.isInputAttachment());}
 const SubsetVariableVector* DescriptorData::getSubsetVariables() const{
     if (!isUniform()) return nullptr;
     return reinterpret_cast<SubsetVariableVector*>(m_additional_data);
@@ -237,7 +237,7 @@ const InputAttachmentDescriptorData* DescriptorData::getInputAttachmentData() co
 }
 PushConstantShaderData DescriptorData::convertToPushConstant(){
     //print error if type isn't convertible
-    if (m_type != TYPE_UNIFORM_BUFFER) PRINT_ERROR("Converting a different type of descriptor than uniform buffer to push constant. Descriptor name :" << m_name)
+    if (!m_type.isUniformBuffer()) PRINT_ERROR("Converting a different type of descriptor than uniform buffer to push constant. Descriptor name :" << m_name)
     //create push constant data from descriptor name and subset variables
     PushConstantShaderData x{m_name, getSubsetVariables()};
     return x;
@@ -247,7 +247,7 @@ bool DescriptorData::exists() const{
 }
 VkDescriptorSetLayoutBinding DescriptorData::getLayoutBinding() const{
     //convert descriptor to VkDescriptorSetLayoutBinding, this is used for allocating descriptor sets
-    return VkDescriptorSetLayoutBinding{m_binding, vulkanDescriptorType(m_type), m_count, m_stage, nullptr};
+    return VkDescriptorSetLayoutBinding{m_binding, m_type.getVulkanDescriptorType(), m_count, m_stage, nullptr};
 } 
 const string& DescriptorData::getName() const{
     return m_name;
