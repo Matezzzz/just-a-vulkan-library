@@ -88,17 +88,31 @@ SharedBufferMemoryObject::SharedBufferMemoryObject(const vector<Buffer>& buffers
     //get a pointer to shared memory
     m_data = g_allocator.get().mapMemory(m_memory, 0, m_buffer_offsets.back());
 }
-void SharedBufferMemoryObject::copyToBuffer(int buffer_index, const void* data, VkDeviceSize size, VkDeviceSize offset){
+void SharedBufferMemoryObject::copyToBuffer(int buffer_index, const void* data, VkDeviceSize size_bytes, VkDeviceSize offset_in_buffer){
     //copy given data to shared memory
-    memcpy(reinterpret_cast<uint8_t*>(m_data) + m_buffer_offsets[buffer_index], data, size);
+    memcpy(reinterpret_cast<uint8_t*>(m_data) + m_buffer_offsets[buffer_index] + offset_in_buffer, data, size_bytes);
+   
+    flushMemory(buffer_index, size_bytes, offset_in_buffer);
+}
+
+uint8_t* SharedBufferMemoryObject::getMemoryPointer(int buffer_index){
+    return reinterpret_cast<uint8_t*>(m_data) + m_buffer_offsets[buffer_index];
+}
+
+
+void SharedBufferMemoryObject::flushMemory(int buffer_index, VkDeviceSize size_bytes, VkDeviceSize offset_in_buffer){
     //flush the memory range - make sure the data is usable by the GPU for all following commands
     //both start and end values must be multiplies of memory block size, take nearest before and after copied range as boundary points
     VkDeviceSize memory_block_size = g_allocator.get().getLimits().nonCoherentAtomSize;
     VkMappedMemoryRange mapped_memory{VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, nullptr, m_memory,
-        roundDownToMemoryBlock(m_buffer_offsets[buffer_index] + offset, memory_block_size), roundUpToMemoryBlock(size, memory_block_size)};
+        roundDownToMemoryBlock((uint64_t) m_buffer_offsets[buffer_index] + offset_in_buffer, memory_block_size), roundUpToMemoryBlock(size_bytes, memory_block_size)};
     VkResult result = vkFlushMappedMemoryRanges(g_device, 1, &mapped_memory);
     DEBUG_CHECK("Memory flush", result)
 }
+void SharedBufferMemoryObject::flushMemory(VkDeviceSize size_bytes){
+    flushMemory(0, size_bytes);
+}
+
 
 
 

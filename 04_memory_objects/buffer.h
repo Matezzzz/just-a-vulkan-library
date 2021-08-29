@@ -125,7 +125,26 @@ public:
      * @param size number of bytes to copy
      * @param offset offset in target buffer
      */
-    void copyToBuffer(int buffer_index, const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
+    void copyToBuffer(int buffer_index, const void* data, VkDeviceSize size_bytes, VkDeviceSize offset_in_buffer = 0);
+
+    /**
+     * Get a pointer to the memory of given buffer.
+     * @param buffer_index index into buffer array passed to constructor to get pointer to
+     */
+    uint8_t* getMemoryPointer(int buffer_index = 0);
+
+    /**
+     * Flush memory (make changes visible to the GPU) in given range
+     * @param buffer_index offset from start of buffer
+     * @param length how many bytes to flush
+     */
+    void flushMemory(int buffer_index, VkDeviceSize size_bytes, VkDeviceSize offset_in_buffer = 0);
+
+    /**
+     * Flush memory (make changes visible to the GPU) in given range. Range starts with the first buffer.
+     * @param size_bytes how many bytes to flush
+     */
+    void flushMemory(VkDeviceSize size_bytes);
 };
 
 

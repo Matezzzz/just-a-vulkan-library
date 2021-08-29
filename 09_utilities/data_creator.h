@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <stdint.h>
+#include <glm/glm.hpp>
+
 
 using std::vector;
 
@@ -16,6 +18,8 @@ public:
     using vector::vector;
     //add together two vectors of vertex data
     Vertices& add(const Vertices& v2);
+
+    Vertices& add(const glm::vec3& v);
 };
 
 
@@ -43,6 +47,10 @@ public:
      * Create screen quad composed of two triangles - rectangle from (-1, -1) to (1, 1). It has XY coords and texture coords from 0 to 1.
      */
     static Vertices screenQuadTexCoords();
+
+    static Vertices unitSphere(uint32_t angle_subdivisions, uint32_t height_subidivions);
+private:
+    static glm::vec3 getUnitSphereVertex(float w, float a);
 };
 
 
