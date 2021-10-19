@@ -104,6 +104,9 @@ protected:
 public:
     //Allocate memory with given properties for each buffer
     BufferMemoryObject(const vector<Buffer>& buffers, VkMemoryPropertyFlags memory_properties);
+
+    //Allocate memory with given properties for one buffer
+    BufferMemoryObject(const Buffer& buffer, VkMemoryPropertyFlags memory_properties);
 };
 
 

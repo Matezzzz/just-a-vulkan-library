@@ -111,3 +111,14 @@ Vertices VertexCreator::unitSphere(uint32_t angle_subdivisions, uint32_t height_
     }
     return vertices;
 }
+Vertices VertexCreator::createQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4){
+    return Vertices{}.add(p1).add(p2).add(p4).add(p2).add(p4).add(p3);
+}
+
+Vertices VertexCreator::createBox(const glm::vec3& a, const glm::vec3& b){
+    glm::vec3 p1{a}; glm::vec3 p2{b.x, a.y, a.z}; glm::vec3 p3{b.x, b.y, a.z}; glm::vec3 p4{a.x, b.y, a.z};
+    glm::vec3 p5{a.x, a.y, b.z}; glm::vec3 p6{b.x, a.y, b.z}; glm::vec3 p7{b}; glm::vec3 p8{a.x, b.y, b.z};
+
+    return Vertices{}.add(createQuad(p1, p2, p3, p4)).add(createQuad(p1, p5, p6, p2)).add(createQuad(p2, p6, p7, p3))
+                     .add(createQuad(p3, p7, p8, p4)).add(createQuad(p4, p8, p5, p1)).add(createQuad(p5, p6, p7, p8));
+}

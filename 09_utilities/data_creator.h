@@ -51,6 +51,10 @@ public:
     static Vertices screenQuadTexCoords();
 
     static Vertices unitSphere(uint32_t angle_subdivisions, uint32_t height_subidivions);
+
+    static Vertices createQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4);
+
+    static Vertices createBox(const glm::vec3& from, const glm::vec3& to);
 };
 
 
