@@ -37,6 +37,13 @@ public:
     //check whether key with the given key code is pressed
     bool keyOn(int glfw_key_code);
 
+    template<int button_code>
+    bool mousePressed(){
+        return glfwGetMouseButton(m_window, button_code);
+    }
+    bool mouseLeft();
+    bool mouseRight();
+
     //return mouse position in the window
     glm::vec2 mousePos();
 
