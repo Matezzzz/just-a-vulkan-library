@@ -302,6 +302,11 @@ void ShaderDataInfo::parseShaderLine(parse::string_view line){
         DescriptorParameterVector parameters {line.getUntilCharView(offset, ')')};
         //get word representing type of line, e.g. in / out / uniform / ...
         parse::string_view info_type {line.getUntilCharView(offset, ' ', true)};
+        if (info_type == "flat"){   //if there is a flat qualifier for integers, skip it
+            info_type = line.getUntilCharView(offset, ' ', true);
+        }
+
+
         //get remaining part of command, this is interpreted differently for each command
         parse::string_view type_name_info {line.getSubstrView(offset)};
         if (info_type == "in"){
