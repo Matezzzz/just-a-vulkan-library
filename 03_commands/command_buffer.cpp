@@ -109,7 +109,7 @@ void CommandBuffer::cmdCopyToTexture(const Buffer& from, Image& texture, ImageSt
     // - VkOffset3D - offset in image to copy into
     // - size of image volume to copy into
     VkBufferImageCopy copy{0, 0, 0, VkImageSubresourceLayers{texture.getAspect(), 0, 0, 1}, VkOffset3D{0, 0, 0}, texture.getSize()};
-    vkCmdCopyBufferToImage(m_buffer, from, texture, state.layout, 1, &copy);
+    vkCmdCopyBufferToImage(m_buffer, from, texture, transfer_state.layout, 1, &copy);
     //if layout needs to be transitioned after end, record the layout transition
     if (end_state != transfer_state){
         cmdBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, texture.createMemoryBarrier(transfer_state, end_state));
