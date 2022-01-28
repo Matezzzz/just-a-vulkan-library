@@ -13,6 +13,9 @@ BufferLayoutCreateType::BufferLayoutCreateType(const string& n, ShaderVariableTy
 uint32_t BufferLayoutCreateType::elementCount() const{
     return array_length * base_length;
 }
+uint32_t BufferLayoutCreateType::sizeBytes() const{
+    return elementCount() * type.sizeBytes();
+}
 
 
 

@@ -53,6 +53,8 @@ public:
     BufferLayoutCreateType(const string& name, ShaderVariableType type, uint32_t array_length = 1, uint32_t offset = OFFSET_NOT_SPECIFIED);
     //return total element count. Equal to (base_length * array_length)
     uint32_t elementCount() const;
+    //return size of this variable in bytes. = elementCount * type.sizeBytes()
+    uint32_t sizeBytes() const;
 };
 
 

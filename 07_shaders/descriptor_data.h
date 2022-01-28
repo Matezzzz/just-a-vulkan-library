@@ -22,6 +22,8 @@ public:
     SubsetVariable(ShaderVariableType type_, const string& name_, uint32_t count = 1, uint32_t offset = OFFSET_NOT_SPECIFIED);
 
     bool operator==(const SubsetVariable& v) const;
+
+    bool usesDefaultOffset() const;
 };
 
 

@@ -4,22 +4,53 @@
 
 
 
+PushConstantRange::PushConstantRange(VkShaderStageFlags s) : m_range{s, 0, 0}{}
+
+bool PushConstantRange::hasIdenticalSpanAs(const PushConstantRange& range) const{
+    return (range.m_range.offset == m_range.offset && range.m_range.size == m_range.size);
+}
+void PushConstantRange::addStage(VkShaderStageFlags s){
+    m_range.stageFlags |= s;
+}
+void PushConstantRange::addVariable(BufferLayoutCreateType t){
+    uint32_t start = std::min(t.offset, m_range.offset);
+    uint32_t end = std::max(t.offset + t.sizeBytes(), m_range.offset + m_range.size);
+    m_range.offset = start;
+    m_range.size = roundUpToMemoryBlock(end - start, 4u);
+}
+VkShaderStageFlags PushConstantRange::getStages() const{
+    return m_range.stageFlags;
+}
+PushConstantRange::operator VkPushConstantRange() const{
+    return m_range;
+}
+
+
+
+
 void PushConstantLayout::addPushConstants(const PushConstantShaderData& data, VkShaderStageFlags stage){
     BufferLayoutCreateTypeVector variables;
+    PushConstantRange range (stage);
     //add all variables from given data as push constants
+    uint32_t current_offset = 0;
     for (const SubsetVariable& var : data.getVariables()){
-        variables.push_back(BufferLayoutCreateType(var.name, var.type, var.count, var.offset));
-        m_stage_flags.push_back(stage);
+        BufferLayoutCreateType t(var.name, var.type, var.count, var.offset);
+        if (var.usesDefaultOffset()) t.offset = roundUpToMemoryBlock(current_offset, t.required_memory_multiple);
+        current_offset = t.offset + t.sizeBytes();
+
+        variables.push_back(t);
+        range.addVariable(t);
     }
     //update parent MixedBufferLayout object
     *static_cast<MixedBufferLayout*>(this) = variables.create();
+    m_ranges.push_back(range);
 }
-void PushConstantLayout::combineWith(const PushConstantLayout& p, VkShaderStageFlags stage){
+void PushConstantLayout::combineWith(const PushConstantLayout& p){
     //go over all push constants to add
     for (const BufferType& t2 : p){
         //if the push constant is over current size, add it without checking(it cannot overlap with any already there)
         if (t2.offset >= m_size){
-            push_back(t2, stage);
+            push_back(t2);
             continue;
         }
         //whether push constant already exists in another shader stage
@@ -35,7 +66,6 @@ void PushConstantLayout::combineWith(const PushConstantLayout& p, VkShaderStageF
             if (t == t2){
                 //add stage to constant stage flags
                 exists_already = true;
-                m_stage_flags[i] |= stage;
                 break;
             }
             //if constant overlaps with one already here, print error and skip adding this one
@@ -49,13 +79,13 @@ void PushConstantLayout::combineWith(const PushConstantLayout& p, VkShaderStageF
         if (!(exists_already || overlaps_other)){
             //if constant is before first one, insert it before all others
             if (t2.end() <= (*this)[0].offset){
-                insert(t2, stage, 0);
+                insert(begin(), t2);
                 continue;
             }
             //go through all constants, if new constant falls between two already there, insert it
             for (uint32_t i = 1; i < size(); i++){
                 if ((*this)[i - 1].end() <= t2.offset && (*this)[i].offset >= t2.end()){
-                    insert(t2, stage, i);
+                    insert(begin() + i, t2);
                     break;
                 } 
             }
@@ -63,33 +93,37 @@ void PushConstantLayout::combineWith(const PushConstantLayout& p, VkShaderStageF
     }
     //recalculate size with new constants
     recalculateSize();
+
+    for (const PushConstantRange& add_range : p.m_ranges){
+        bool matched = false;
+        for (PushConstantRange& range : m_ranges){
+            if (range.hasIdenticalSpanAs(add_range)){
+                range.addStage(add_range.getStages());
+                matched = true;
+                break;
+            }
+        }
+        if (!matched){
+            m_ranges.push_back(add_range);
+        }
+    }
 }
 vector<VkPushConstantRange> PushConstantLayout::getPushConstantRanges() const{
     //convert push constants to vector<VkPushConstantRange>
     vector<VkPushConstantRange> ranges;
     ranges.reserve(size());
-    for (uint32_t i = 0; i < size(); i++){
-        ranges.push_back(VkPushConstantRange{m_stage_flags[i], (*this)[i].offset, roundUpToMemoryBlock((*this)[i].sizeBytes(), 4U)});
+    for (const PushConstantRange& range : m_ranges){
+        ranges.push_back(range);
     }
     return ranges;
 }
 VkShaderStageFlags PushConstantLayout::getAllStages() const{
     //get a bitwise or of all stage flags
     VkShaderStageFlags flags = 0;
-    for (uint32_t i = 0; i < size(); i++){
-        flags |= m_stage_flags[i];
+    for (const PushConstantRange& range : m_ranges){
+        flags |= range.getStages();
     }
     return flags;
-}
-void PushConstantLayout::push_back(const BufferType& t, VkShaderStageFlags flags){
-    //add t to MixedBufferLayout and matching flags to m_stage_flags
-    MixedBufferLayout::push_back(t);
-    m_stage_flags.push_back(flags);
-}
-void PushConstantLayout::insert(const BufferType& t, VkShaderStageFlags flags, uint32_t i){
-    //insert values at given positions
-    MixedBufferLayout::insert(MixedBufferLayout::begin() + i, t);
-    m_stage_flags.insert(m_stage_flags.begin() + i, flags);
 }
 void PushConstantLayout::recalculateSize(){ 
     //find max end from all push constants
@@ -270,7 +304,7 @@ void ShaderDataInfo::combineWithShaderData(const ShaderDataInfo& info){
 
     //combine descriptor sets and push constants
     m_descriptor_sets.combineWith(info.m_descriptor_sets);
-    m_push_constants.combineWith(info.m_push_constants, info.getStage());
+    m_push_constants.combineWith(info.m_push_constants);
     
     //concantenate both input arrays
     m_inputs.reserve(m_inputs.size() + info.m_inputs.size());
