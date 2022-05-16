@@ -149,7 +149,7 @@ public:
 
 class UniformBufferRawData : public UniformBufferData{
 protected:
-    uint32_t m_write_offset;
+    uint32_t m_write_offset = 0;
 public:
     UniformBufferRawData(uint32_t size = 0);
 
