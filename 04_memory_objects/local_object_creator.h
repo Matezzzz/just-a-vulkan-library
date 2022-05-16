@@ -152,7 +152,7 @@ private:
         //current buffer index
         uint32_t buffer_i = buffers.size();
         //create buffer from current info. VK_BUFFER_USAGE_TRANSFER_DST_BIT flag is enabled to make it possible to copy given data to buffer later.
-        buffers.push_back(BufferInfo{data.data, data.usage, data.create_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT}.create());
+        buffers.push_back(BufferInfo{data.data, data.usage | VK_BUFFER_USAGE_TRANSFER_DST_BIT, data.create_flags}.create());
         //create remaining buffers
         createBuffersInternal(default_usage_flags, buffers, other_data_vectors...);
         //after all buffers are created, they have memory bound to them already. Now given data can be copied to the buffer

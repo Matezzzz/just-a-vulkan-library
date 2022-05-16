@@ -7,13 +7,26 @@
 #include "parsing_utils.h"
 
 
+
+class PushConstantRange{
+    VkPushConstantRange m_range;
+public:
+    PushConstantRange(VkShaderStageFlags stage);
+    bool hasIdenticalSpanAs(const PushConstantRange& range) const;
+    void addStage(VkShaderStageFlags stage);
+    void addVariable(BufferLayoutCreateType t);
+    VkShaderStageFlags getStages() const;
+    operator VkPushConstantRange() const;
+};
+
 /**
  * PushConstantLayout
  *  - Holds layout of push constants for one single stage when initialized, can be merged with layouts of other stages to hold layout for all shaders
  */
 class PushConstantLayout : public MixedBufferLayout{
     //Holds stage flags for each variable in mixed buffer layout
-    vector<VkShaderStageFlags> m_stage_flags;
+
+    vector<PushConstantRange> m_ranges;
 public:
     //add push constants from given data for given stage
     void addPushConstants(const PushConstantShaderData& data, VkShaderStageFlags stage);
@@ -23,19 +36,13 @@ public:
      * @param p other push constant layout to combine with
      * @param stage - other layout stage flags
      */
-    void combineWith(const PushConstantLayout& p, VkShaderStageFlags stage);
+    void combineWith(const PushConstantLayout& p);
 
     //get a vector of push constant ranges - this is called when creating pipeline layout
     vector<VkPushConstantRange> getPushConstantRanges() const;
 
     //return combined flags of all stages that will be using these push constants
     VkShaderStageFlags getAllStages() const;
-
-    //add new variable to layout
-    void push_back(const BufferType& t, VkShaderStageFlags flags);
-
-    //insert variable at the given index - is used to keep variables sorted by offset
-    void insert(const BufferType& t, VkShaderStageFlags flags, uint32_t i);
 private:
     //recalculate size after adding new variables
     void recalculateSize();

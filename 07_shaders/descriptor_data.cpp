@@ -12,7 +12,9 @@ SubsetVariable::SubsetVariable(ShaderVariableType type_, const string& name_, ui
 bool SubsetVariable::operator==(const SubsetVariable& v) const{
     return (type == v.type && count == v.count && name == v.name && offset == v.offset);
 }
-
+bool SubsetVariable::usesDefaultOffset() const{
+    return offset == OFFSET_NOT_SPECIFIED;
+}
 
 
 

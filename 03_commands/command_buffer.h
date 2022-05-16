@@ -207,6 +207,15 @@ public:
      */
     void cmdBindVertexBuffers(vector<VkBuffer> buffers, vector<VkDeviceSize> buffer_offsets, uint32_t binding_offset = 0);
 
+
+    /**
+     * Bind given index buffer
+     * @param buffer the buffer to bind
+     * @param data_type which data types do the indices have, possible values VK_INDEX_TYPE_***
+     * @param offset offset from the start of the buffer in bytes
+     */
+    void cmdBindIndexBuffer(VkBuffer buffer, VkIndexType data_type = VK_INDEX_TYPE_UINT32, VkDeviceSize offset = 0);
+
     /**
      * Upload given push constant data
      * @param pipeline
@@ -229,6 +238,25 @@ public:
      * @param instance_offset index of instance to start from
      */
     void cmdDrawInstances(uint32_t vertex_count, uint32_t instance_count, uint32_t vertex_offset = 0, uint32_t instance_offset = 0);
+
+    /**
+     * Draw instances based on vertex and index buffers
+     * @param index_count how many indices to draw per instance
+     * @param index_offset offset into indices buffer
+     * @param index_shift modify all indices in the buffer by this value before drawing
+     */
+    void cmdDrawVerticesIndexed(uint32_t index_count, uint32_t index_offset = 0, int32_t index_shift = 0);
+
+    /**
+     * Draw instances based on vertex and index buffers
+     * @param index_count how many indices to draw per instance
+     * @param instance_count how many instances to draw
+     * @param index_offset offset into indices buffer
+     * @param instance_offset which instance id to start at
+     * @param index_shift modify all indices in the buffer by this value before drawing
+     */
+    void cmdDrawInstancesIndexed(uint32_t index_count, uint32_t instance_count, uint32_t index_offset = 0, uint32_t instance_offset = 0, int32_t index_shift = 0);
+
 
     //End current render pass
     void cmdEndRenderPass();

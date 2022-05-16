@@ -78,6 +78,8 @@ BufferMemoryObject::BufferMemoryObject(const vector<Buffer>& buffers, VkMemoryPr
         DEBUG_CHECK("Buffer memory binding", result);
     }  
 }
+BufferMemoryObject::BufferMemoryObject(const Buffer& buffer, VkMemoryPropertyFlags memory_properties) : BufferMemoryObject{vector<Buffer>{buffer}, memory_properties}
+{}
 
 
 

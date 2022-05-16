@@ -27,6 +27,12 @@ bool Window::running(){
 bool Window::keyOn(int key){
     return glfwGetKey(m_window, key);
 }
+bool Window::mouseLeft(){
+    return mousePressed<GLFW_MOUSE_BUTTON_LEFT>();
+}
+bool Window::mouseRight(){
+    return mousePressed<GLFW_MOUSE_BUTTON_RIGHT>();
+}
 glm::vec2 Window::mousePos(){
     double x, y;
     glfwGetCursorPos(m_window, &x, &y);

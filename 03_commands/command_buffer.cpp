@@ -109,7 +109,7 @@ void CommandBuffer::cmdCopyToTexture(const Buffer& from, Image& texture, ImageSt
     // - VkOffset3D - offset in image to copy into
     // - size of image volume to copy into
     VkBufferImageCopy copy{0, 0, 0, VkImageSubresourceLayers{texture.getAspect(), 0, 0, 1}, VkOffset3D{0, 0, 0}, texture.getSize()};
-    vkCmdCopyBufferToImage(m_buffer, from, texture, state.layout, 1, &copy);
+    vkCmdCopyBufferToImage(m_buffer, from, texture, transfer_state.layout, 1, &copy);
     //if layout needs to be transitioned after end, record the layout transition
     if (end_state != transfer_state){
         cmdBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, texture.createMemoryBarrier(transfer_state, end_state));
@@ -167,18 +167,28 @@ void CommandBuffer::cmdBindVertexBuffers(vector<VkBuffer> buffers, uint32_t bind
 void CommandBuffer::cmdBindVertexBuffers(vector<VkBuffer> buffers, vector<VkDeviceSize> buffer_offsets, uint32_t binding_offset){
     vkCmdBindVertexBuffers(m_buffer, binding_offset, buffers.size(), buffers.data(), buffer_offsets.data());
 }
+void CommandBuffer::cmdBindIndexBuffer(VkBuffer buffer, VkIndexType data_type, VkDeviceSize offset){
+    vkCmdBindIndexBuffer(m_buffer, buffer, offset, data_type);
+}
 void CommandBuffer::cmdPushConstants(const Pipeline& pipeline, const PushConstantData& push_consts){
     //                                                                          0 -> no offset
     vkCmdPushConstants(m_buffer, pipeline.getLayout(), push_consts.getStages(), 0, push_consts.size(), push_consts.data());
 }
 void CommandBuffer::cmdDrawVertices(uint32_t vertex_count, uint32_t vertex_offset)
 {
-    //                                1 -> 1 instance   0 -> no instance offset
-    vkCmdDraw(m_buffer, vertex_count, 1, vertex_offset, 0);
+    cmdDrawInstances(vertex_count, 1, vertex_offset, 0);
 }
 void CommandBuffer::cmdDrawInstances(uint32_t vertex_count, uint32_t instance_count, uint32_t vertex_offset, uint32_t instance_offset){
     vkCmdDraw(m_buffer, vertex_count, instance_count, vertex_offset, instance_offset);
 }
+void CommandBuffer::cmdDrawVerticesIndexed(uint32_t index_count, uint32_t index_offset, int32_t index_shift){
+    cmdDrawInstancesIndexed(index_count, 1, index_offset, 0, index_shift);
+}
+
+void CommandBuffer::cmdDrawInstancesIndexed(uint32_t index_count, uint32_t instance_count, uint32_t index_offset, uint32_t instance_offset, int32_t index_shift){
+    vkCmdDrawIndexed(m_buffer, index_count, instance_count, index_offset, index_shift, instance_offset);
+}
+
 void CommandBuffer::cmdEndRenderPass(){
     vkCmdEndRenderPass(m_buffer);
 }
