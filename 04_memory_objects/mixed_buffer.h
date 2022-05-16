@@ -149,6 +149,8 @@ class UniformBufferRawData : public UniformBufferData{
 protected:
     uint32_t m_write_offset;
 public:
+    UniformBufferRawData(uint32_t size = 0);
+
     template<typename T>
     UniformBufferRawData& write(const T* val, uint32_t data_len_elements){
         UniformBufferData::write(m_write_offset, val, data_len_elements);
@@ -168,6 +170,8 @@ vector<uint32_t> convertArrayOfBools(uint32_t len, const bool* data);
 
 class UniformBufferRawDataSTD140 : public UniformBufferRawData{
 public:
+    UniformBufferRawDataSTD140(uint32_t size = 0);
+
     template<typename T, uint32_t data_len_elements, uint32_t alignment>
     UniformBufferRawDataSTD140& write(const T* val){
         m_write_offset = roundUpToMemoryBlock(m_write_offset, alignment);

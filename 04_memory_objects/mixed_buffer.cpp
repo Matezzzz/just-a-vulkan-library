@@ -68,6 +68,9 @@ void MixedBufferLayout::setSize(uint32_t size){
 
 
 
+UniformBufferRawData::UniformBufferRawData(uint32_t size) : UniformBufferData(size)
+{}
+
 
 MixedBufferLayout BufferLayoutCreateTypeVector::create(uint32_t first_var_offset){
     MixedBufferLayout layout;
@@ -101,6 +104,9 @@ vector<uint32_t> convertArrayOfBools(uint32_t len, const bool* data){
     for (uint32_t i = 0; i < len; i++) v.push_back(data[i]);
     return v;
 }
+
+UniformBufferRawDataSTD140::UniformBufferRawDataSTD140(uint32_t size) : UniformBufferRawData(size)
+{}
 
 UniformBufferRawDataSTD140& UniformBufferRawDataSTD140::write(bool     n){return write<bool    , 1, 4>(&n);}
 UniformBufferRawDataSTD140& UniformBufferRawDataSTD140::write(int32_t  n){return write<int32_t , 1, 4>(&n);}
