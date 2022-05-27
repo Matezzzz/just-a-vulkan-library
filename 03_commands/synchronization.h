@@ -5,7 +5,7 @@
 
 
 
-using nanoseconds = long long unsigned int; 
+using nanoseconds = uint64_t; 
 
 //second in nanoseconds
 const nanoseconds SYNC_SECOND = 1000000000;
@@ -103,6 +103,11 @@ public:
     SubmitSynchronization& setEndFence(VkFence fence);
 
     /**
+     * Create and set a fence that will be signaled when command buffer submit ends.
+     */
+    SubmitSynchronization& addEndFence();
+
+    /**
      * Returns true if there was an end fence set.
      */
     bool hasEndFence() const;
@@ -124,7 +129,7 @@ public:
      * Check whether all command buffers have finished - the fence is signalled.
      * @param timeout how long to wait before returning false
      */
-    void waitFor(uint32_t timeout);
+    void waitFor(nanoseconds timeout);
 
     /**
      * Returns fence if set, else VK_NULL_HANDLE.

@@ -38,7 +38,7 @@ VertexInputInfo& VertexInputInfo::addFloatBuffer(vector<uint32_t> data_setup, Vk
                 format = VK_FORMAT_R32G32B32A32_SFLOAT;
                 break;
             default:
-                PRINT_ERROR("Format of requested size not found");
+                DEBUG_ERROR("Format of requested size not found");
                 break;
         }
         //add data description - defines input from buffer in one location

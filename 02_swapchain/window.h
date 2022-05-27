@@ -17,8 +17,10 @@
  *  - Wrapper around GLFWwindow class, uses GLFW to create and manage window
  */
 class Window{
-    const uint32_t m_width;
-    const uint32_t m_height;
+public:
+    const uint32_t width;
+    const uint32_t height;
+private:
     const VkInstance m_vulkan_instance;
     GLFWwindow* m_window;
     VkSurfaceKHR m_screen_surface = VK_NULL_HANDLE;
@@ -51,9 +53,12 @@ public:
     void setMousePos(const glm::vec2& v);
     const VkSurfaceKHR& getSurface() const;
     operator GLFWwindow*();
-    uint32_t getWidth() const;
-    uint32_t getHeight() const;
-    glm::vec2 getSize() const;
+
+    //get a (width, height) vector
+    glm::uvec2 size() const;
+
+    //get a (width, height) float vector. Both in pixels.
+    glm::vec2 fsize() const;
 
     //destroy window and terminate GLFW
     void destroy();

@@ -2,7 +2,7 @@
 #define RENDERPASS_H
 
 #include "../00_base/vulkan_base.h"
-
+#include <glm/glm.hpp>
 
 /**
  * ClearValue
@@ -15,12 +15,30 @@
 class ClearValue {
     VkClearValue m_value;
 public:
-    ClearValue(uint32_t r, uint32_t g = 0, uint32_t b = 0, uint32_t a = 0);
-    ClearValue(int32_t r, int32_t g = 0, int32_t b = 0, int32_t a = 0);
-    ClearValue(float r, float g = 0, float b = 0, float a = 0);
-    ClearValue(float depth, uint32_t stencil);
+    //Create a ClearValue with given uint components.
+    constexpr ClearValue(uint32_t r, uint32_t g = 0, uint32_t b = 0, uint32_t a = 0) : m_value{.color{.uint32{r, g, b, a}}}
+    {}
+    //Create a ClearValue with given int components.
+    constexpr ClearValue(int32_t r, int32_t g = 0, int32_t b = 0, int32_t a = 0) : m_value{.color{.int32{r, g, b, a}}}
+    {}
+    //Create a ClearValue with given float components.
+    constexpr ClearValue(float r, float g = 0, float b = 0, float a = 0) : m_value{.color{.float32{r, g, b, a}}}
+    {}
+    //Create a ClearValue with given depth & stencil components.
+    constexpr ClearValue(float depth, uint32_t stencil) : m_value{.depthStencil{depth, stencil}}
+    {}
     operator const VkClearValue&() const;
 };
+
+//Provides some basic clear values
+class BaseClearValue{
+public:
+    static constexpr ClearValue Black{0, 0, 0, 0};
+    static constexpr ClearValue BlackOpaque{0, 0, 0, 0};
+    static constexpr ClearValue Depth1f{1.f, 0u};
+    static constexpr ClearValue DepthStencil1f0{1.f, 0u};
+};
+
 
 
 
@@ -50,6 +68,21 @@ public:
      * @param clear_values values, with which to clear all 
      */
     RenderPassSettings(uint32_t width, uint32_t height, const vector<ClearValue>& clear_values);
+
+    /**
+     * Create new renderpass settings.
+     * @param size the size of images to render into
+     * @param clear_values values, with which to clear all 
+     */
+    RenderPassSettings(glm::uvec2 size, const vector<ClearValue>& clear_values);
+
+    /**
+     * @brief Add a clear value to these settings
+     * 
+     * @param value the ClearValue to add
+     */
+    void addClearValue(const ClearValue& value);
+
     //Fill begin info with given render pass and framebuffer, then return it
     const VkRenderPassBeginInfo& getBeginInfo(VkRenderPass render_pass, VkFramebuffer framebuffer);
 };
@@ -82,6 +115,9 @@ class RenderPassInfo{
 
     //attachments whose contents to preserve during this subpass
     vector<vector<uint32_t>> m_preserve_attachments;
+protected:
+    //get number of attachments
+    uint32_t getAttachmentCount();
 public:
     //Create without color attachments
     RenderPassInfo(uint32_t subpass_count = 1);

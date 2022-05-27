@@ -196,7 +196,7 @@ uint32_t ShaderParseUtils::readDescriptorCount(parse::string_view name_word){
     }
     catch(std::invalid_argument& e){
         std::cerr << e.what() << '\n';
-        PRINT_ERROR("Failed to read descriptor count from string " << name_word.str())
+        DEBUG_ERROR("Failed to read descriptor count from string " << name_word.str())
         return 0;
     }
 }

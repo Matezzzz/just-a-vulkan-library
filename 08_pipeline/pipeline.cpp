@@ -25,6 +25,11 @@ VkPipelineBindPoint Pipeline::getBindPoint() const{
 PipelineInfo::PipelineInfo(uint32_t width, uint32_t height, uint32_t color_attachment_count) : 
     m_viewport_info(width, height), m_blend_info(color_attachment_count)
 {}
+PipelineInfo::PipelineInfo(const glm::uvec2& size, uint32_t color_attachment_count) : 
+    PipelineInfo(size.x, size.y, color_attachment_count)
+{}
+
+
 
 VkPipeline PipelineInfo::create(const vector<VkPipelineShaderStageCreateInfo>& shader_modules, const VkPipelineLayout& layout, VkRenderPass render_pass, uint32_t subpass_index) const
 {

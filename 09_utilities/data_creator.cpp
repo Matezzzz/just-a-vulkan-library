@@ -6,8 +6,7 @@
 constexpr float PI = 3.1415926;
 
 Vertices& Vertices::add(const Vertices& v2){
-    //add all vertices from v2 into current vertices object
-    insert(end(), v2.begin(), v2.end());
+    vector_ext<float>::add(v2);
     return *this;
 }
 Vertices& Vertices::add(const glm::vec3& v){
@@ -15,7 +14,7 @@ Vertices& Vertices::add(const glm::vec3& v){
     return *this;
 }
 Vertices& Vertices::addCoordinate(uint32_t current_coordinate_count, uint32_t insert_after_pos, float new_coord_value){
-    if (size() % current_coordinate_count) PRINT_ERROR("Current coordinate count does not divide total vertex count.")
+    if (size() % current_coordinate_count) DEBUG_ERROR("Current coordinate count does not divide total vertex count.")
     Vertices new_vertices;
     new_vertices.reserve(size() + size() / current_coordinate_count);
     for (uint32_t i = 0; i < size(); i++){    

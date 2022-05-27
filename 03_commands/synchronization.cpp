@@ -23,7 +23,7 @@ void Fence::reset(){
     VkResult result = vkResetFences(g_device, 1, &m_fence);
     DEBUG_CHECK("Reset fence", result)
 }
-bool Fence::waitFor(long long unsigned int timeout) const{
+bool Fence::waitFor(nanoseconds timeout) const{
     //wait_for_all - true->wait for all fences to be set / false->wait until one fence is set. Value doesn't matter for one fence
     //                                          fence count,,wait_for_all
     VkResult result = vkWaitForFences(g_device, 1, &m_fence, true, timeout);
@@ -68,6 +68,9 @@ SubmitSynchronization& SubmitSynchronization::setEndFence(VkFence fence){
     m_end_fence = Fence(fence);
     return *this;
 }
+SubmitSynchronization& SubmitSynchronization::addEndFence(){
+    return setEndFence(Fence());
+}
 bool SubmitSynchronization::hasEndFence() const{
     return m_end_fence.valid();
 }
@@ -80,16 +83,16 @@ SubmitSynchronization& SubmitSynchronization::addStartSemaphore(VkSemaphore sema
     m_start_semaphores_stage_flags.push_back(start_pipeline_flags);
     return *this;
 }
-void SubmitSynchronization::waitFor(uint32_t timeout){
+void SubmitSynchronization::waitFor(nanoseconds timeout){
     //if there is no end fance to wait for, print error and return false
     if (!m_end_fence.valid()){
-        PRINT_ERROR("No end fence set, nothing to wait for")
+        DEBUG_ERROR("No end fence set, nothing to wait for")
     }
     //otherwise, wait for the fence
     if (m_end_fence.waitFor(timeout)){
         m_end_fence.reset();
     }else{
-        PRINT_ERROR("Waiting for queue expired")
+        DEBUG_ERROR("Waiting for queue expired")
     }
 }
 Fence SubmitSynchronization::getEndFence() const{

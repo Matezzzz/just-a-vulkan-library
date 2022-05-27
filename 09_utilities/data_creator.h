@@ -1,6 +1,8 @@
 #ifndef VERTEX_CREATOR_H
 #define VERTEX_CREATOR_H
 
+#include "../09_utilities/vector_ext.h"
+
 #include <vector>
 #include <stdint.h>
 #include <glm/glm.hpp>
@@ -13,9 +15,9 @@ using std::vector;
  * Vertices
  *  - holds array of float information for vertices
  */
-class Vertices : public vector<float>{
+class Vertices : public vector_ext<float>{
 public:
-    using vector::vector;
+    using vector_ext<float>::vector_ext;
     //add together two vectors of vertex data
     Vertices& add(const Vertices& v2);
 

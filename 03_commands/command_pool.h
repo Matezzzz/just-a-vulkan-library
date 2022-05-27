@@ -18,7 +18,7 @@ public:
 
     /**
      * Reset the command pool and turn all allocated buffers into state before recording.
-     * @param release_resources 0 to keep or VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT to release all resources used by the buffers
+     * @param release_resources true to release, false to keep
      */
     void reset(bool release_resources);
 

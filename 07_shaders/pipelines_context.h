@@ -15,7 +15,8 @@ class PipelineInfo;
 
 enum DescriptorUpdateInfoType{
     UPDATE_INFO_IMAGE,
-    UPDATE_INFO_BUFFER
+    UPDATE_INFO_BUFFER,
+    UPDATE_INFO_NONE
 };
 
 /**
@@ -47,7 +48,10 @@ public:
     DescriptorUpdateInfo(const string& name, VkDescriptorType type, VkBuffer buffer, VkDeviceSize offset = 0, VkDeviceSize range = VK_WHOLE_SIZE);
     ~DescriptorUpdateInfo();
 
+    DescriptorUpdateInfo();
+
     bool isImage() const;
+    bool isBuffer() const;
     const string& getName() const;
     VkDescriptorType getType() const;
 
@@ -163,25 +167,15 @@ public:
     }
 
     //update descriptors using given vector of infos (update descriptors vector)
-    void updateDescriptorsV(const vector<DescriptorUpdateInfo>& infos){
-        vector<VkWriteDescriptorSet> writes(infos.size());
-        //convert infos to VkWriteDescriptorSet structures
-        for (int i = 0; i < (int) infos.size(); i++){
-            saveDescriptorWriteInfo(writes[i], infos[i]);
-        }
-        //update descriptor sets
-        updateDescriptorSets(writes);
-    }
+    void updateDescriptorsV(const vector<DescriptorUpdateInfo>& infos);
     //update all descriptors using vkUpdateDescriptorSets function
-    void updateDescriptorSets(const vector<VkWriteDescriptorSet>& write_infos){
-        vkUpdateDescriptorSets(g_device, write_infos.size(), write_infos.data(), 0, nullptr);
-    }
+    void updateDescriptorSets(const vector<VkWriteDescriptorSet>& write_infos);
+
+    //search for descriptor by name from info
+    uint32_t findDescriptor(const DescriptorUpdateInfo& info);
 private:
     //if there are no more infos to convert to VkWriteDescriptorSet objects, update sets 
-    void updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t){
-        updateDescriptorSets(write_infos);
-    }
-
+    void updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t);
     //fill write info at current_index with information from info, then call updateDescriptorsInternal again with update infos
     template<typename ...Ts>
     void updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t current_index, const DescriptorUpdateInfo& info, const Ts&... update_infos)
@@ -192,26 +186,7 @@ private:
     }
 
     //convert one write info to VkWriteDescriptorSet object and save it to given reference
-    void saveDescriptorWriteInfo(VkWriteDescriptorSet& write_info, const DescriptorUpdateInfo& info){
-        uint32_t descriptor_index = m_layout->find(info.getName());
-        if (descriptor_index != NPOS_32BIT){
-            //check whether shader descriptor type is of the same type as update info
-            VkDescriptorType shader_descriptor_type = (*m_layout)[descriptor_index].getType().getVulkanDescriptorType();
-            if (shader_descriptor_type == info.getType()){
-                //fill VkWriteDescriptorSet structure
-                write_info = VkWriteDescriptorSet{
-                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    nullptr, m_set, descriptor_index, 0,
-                    1, shader_descriptor_type,
-                    info.imageInfo(), info.bufferInfo(), nullptr
-                };
-            }else{
-                PRINT_ERROR(info.getName() << ": Attempt to write descriptor of invalid type")
-            }
-        }else{
-            PRINT_ERROR(info.getName() << ": Descriptor of given name not found")
-        }
-    }
+    void saveDescriptorWriteInfo(VkWriteDescriptorSet& write_info, const DescriptorUpdateInfo& info);
 };
 
 
@@ -354,7 +329,7 @@ public:
         uint32_t set_count = m_shader_info.getSets().size();
         //check that there is same number of shader sets and numbers given
         if (sizeof...(Ts) != set_count){
-            PRINT_ERROR("Incorrect number of descriptor set counts to reserve. Required: " << set_count << ", given: " << sizeof...(Ts))
+            DEBUG_ERROR("Incorrect number of descriptor set counts to reserve. Required: " << set_count << ", given: " << sizeof...(Ts))
             return;
         }
         //resize set counts to reflect amount of numbers
@@ -372,7 +347,7 @@ public:
         //make sure are as many set structures as sets
         uint32_t set_count = m_shader_info.getSets().size();
         if (sizeof...(Ts) != set_count){
-            PRINT_ERROR("Incorrect number of descriptor set counts to allocate. Required: " << set_count << ", given: " << sizeof...(Ts))
+            DEBUG_ERROR("Incorrect number of descriptor set counts to allocate. Required: " << set_count << ", given: " << sizeof...(Ts))
             return;
         }
         //call internal function to allocate all sets into given structures
@@ -418,7 +393,7 @@ private:
         //get available set count
         uint32_t set_count = m_descriptor_set_counts[cur_index];
         //if there are reserved sets that the user is not asking for, print error
-        if (set_count != 0) PRINT_ERROR("Not asking for allocation of a reserved set. Index: " << cur_index <<", Available sets: " << set_count);
+        if (set_count != 0) DEBUG_ERROR("Not asking for allocation of a reserved set. Index: " << cur_index <<", Available sets: " << set_count);
         //allocate remaining sets
         allocateDescriptorSetsInternal(++cur_index, other_sets...);
     }
@@ -434,7 +409,7 @@ private:
         //current number of reserved sets
         uint32_t set_count = m_descriptor_set_counts[cur_index];
         //if user is not requesting one set exactly, print error
-        if (set_count != 1) PRINT_ERROR("Requesting allocation of invalid number of sets. Set index: " << cur_index << ", Available: " << set_count << ", Requesting: 1");
+        if (set_count != 1) DEBUG_ERROR("Requesting allocation of invalid number of sets. Set index: " << cur_index << ", Available: " << set_count << ", Requesting: 1");
         //allocate one set of correct layout, then save it into set structure
         set = DescriptorSet(m_set_manager.allocateSet(m_shader_info.getSets()[cur_index].getOrCreateLayout()), m_shader_info.getSets()[cur_index]);
         //allocate remaining sets
@@ -453,7 +428,7 @@ private:
         //current number of reserved sets
         uint32_t set_count = m_descriptor_set_counts[cur_index];
         //if current number of sets is not the same as reserved set count
-        if (set_count != sets.size()) PRINT_ERROR("Requesting allocation of invalid number of sets. Set index: " << cur_index << ", Available: " << set_count << ", Requesting: " << sets.size());
+        if (set_count != sets.size()) DEBUG_ERROR("Requesting allocation of invalid number of sets. Set index: " << cur_index << ", Available: " << set_count << ", Requesting: " << sets.size());
         //here sets should be allocated and saved
         for (DescriptorSet* s : sets){
             *s = DescriptorSet(m_set_manager.allocateSet(m_shader_info.getSets()[cur_index].getOrCreateLayout()), m_shader_info.getSets()[cur_index]);

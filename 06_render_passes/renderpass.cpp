@@ -1,14 +1,7 @@
 #include "renderpass.h"
 #include "../01_device/allocator.h"
 
-ClearValue::ClearValue(uint32_t r, uint32_t g, uint32_t b, uint32_t a) : m_value{.color{.uint32{r, g, b, a}}}
-{}
-ClearValue::ClearValue(int32_t r, int32_t g, int32_t b, int32_t a) : m_value{.color{.int32{r, g, b, a}}}
-{}
-ClearValue::ClearValue(float r, float g, float b, float a) : m_value{.color{.float32{r, g, b, a}}}
-{}
-ClearValue::ClearValue(float depth, uint32_t stencil) : m_value{.depthStencil{depth, stencil}}
-{}
+
 ClearValue::operator const VkClearValue&() const{
     return m_value;
 }
@@ -30,6 +23,16 @@ RenderPassSettings::RenderPassSettings(uint32_t width, uint32_t height, const ve
         m_clear_values[i] = clear_values[i];
     }
 }
+RenderPassSettings::RenderPassSettings(glm::uvec2 size, const vector<ClearValue>& clear_values) :
+    RenderPassSettings(size.x, size.y, clear_values)
+{}
+void RenderPassSettings::addClearValue(const ClearValue& value){
+    m_clear_values.push_back(value);
+    //update size and pointer in begin info
+    m_begin_info.clearValueCount = (uint32_t) m_clear_values.size();
+    m_begin_info.pClearValues = m_clear_values.data();
+}
+
 const VkRenderPassBeginInfo& RenderPassSettings::getBeginInfo(VkRenderPass render_pass, VkFramebuffer framebuffer){
     m_begin_info.renderPass = render_pass;
     m_begin_info.framebuffer = framebuffer;
@@ -63,6 +66,9 @@ RenderPassInfo& RenderPassInfo::addAttachmentDepthStencil(VkFormat format, VkAtt
 }
 //RenderPassInfo& RenderPassInfo::addSubpassDependency();
 
+uint32_t RenderPassInfo::getAttachmentCount(){
+    return m_attachments.size();
+}
 RenderPassInfo& RenderPassInfo::linkInputAttachment(uint32_t subpass_index, uint32_t attachment_index, VkImageLayout attachment_layout){
     //add input attachment to given subpass, then update pointer and count of input attachments in subpass structure
     m_input_attachments[subpass_index].push_back(VkAttachmentReference{attachment_index, attachment_layout});

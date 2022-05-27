@@ -251,18 +251,18 @@ public:
         ShaderBasicType correct_type(*val);
         if (var_index >= m_variables.size())
         {
-            PRINT_ERROR("Could not set mixed buffer data, variable index out of range.");
+            DEBUG_ERROR("Could not set mixed buffer data, variable index out of range.");
             return *this;
         }
         const BufferType& buffer_var = m_variables[var_index];
         if (buffer_var.type != correct_type)
         {
-            PRINT_ERROR("Attempting to set uniform of incompatible type. Setting " << buffer_var.type.toString() << " with " << correct_type.toString() << " array.\n");
+            DEBUG_ERROR("Attempting to set uniform of incompatible type. Setting " << buffer_var.type.toString() << " with " << correct_type.toString() << " array.\n");
             return *this;
         }
         if (buffer_var.length != data_len)
         {
-            PRINT_ERROR("Data to be set is not the same size as available space. Required length: " << buffer_var.length << ", Given data: " << data_len)
+            DEBUG_ERROR("Data to be set is not the same size as available space. Required length: " << buffer_var.length << ", Given data: " << data_len)
             return *this;
         }
         UniformBufferData::write(buffer_var.offset, val, m_variables[var_index].size());

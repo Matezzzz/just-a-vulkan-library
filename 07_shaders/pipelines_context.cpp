@@ -13,6 +13,9 @@ DescriptorUpdateInfo::DescriptorUpdateInfo(const string& name, VkDescriptorType 
 DescriptorUpdateInfo::DescriptorUpdateInfo(const DescriptorUpdateInfo& i) :
     m_name{i.m_name}, m_type{i.m_type}, m_info{.copied=i.copyInfo()}, m_vulkan_type{i.m_vulkan_type}
 {}
+DescriptorUpdateInfo::DescriptorUpdateInfo() :
+    m_type(UPDATE_INFO_NONE), m_info{nullptr}
+{}
 DescriptorUpdateInfo& DescriptorUpdateInfo::operator=(const DescriptorUpdateInfo& i){
     m_name = i.m_name;
     m_type = i.m_type;
@@ -24,12 +27,15 @@ DescriptorUpdateInfo::~DescriptorUpdateInfo(){
     //delete info based on type
     if (isImage()){
         delete imageInfo();
-    }else{
+    }else if (isBuffer()){
         delete bufferInfo();
     }
 }
 bool DescriptorUpdateInfo::isImage() const{
     return (m_type == UPDATE_INFO_IMAGE);
+}
+bool DescriptorUpdateInfo::isBuffer() const{
+    return m_type == UPDATE_INFO_BUFFER;
 }
 const string& DescriptorUpdateInfo::getName() const{
     return m_name;
@@ -49,19 +55,21 @@ const VkDescriptorImageInfo* DescriptorUpdateInfo::imageInfo() const{
 }
 VkDescriptorBufferInfo* DescriptorUpdateInfo::bufferInfo(){
     //return ptr if updating buffer, otherwise nullptr
-    if (!isImage()) return m_info.buffer;
+    if (isBuffer()) return m_info.buffer;
     return nullptr;
 }
 const VkDescriptorBufferInfo* DescriptorUpdateInfo::bufferInfo() const{
     //return ptr if updating buffer, otherwise nullptr
-    if (!isImage()) return m_info.buffer;
+    if (isBuffer()) return m_info.buffer;
     return nullptr;
 }
 void* DescriptorUpdateInfo::copyInfo() const{
-    if (m_type == UPDATE_INFO_IMAGE){
+    if (isImage()){
         return (void*) new VkDescriptorImageInfo(*m_info.image);
+    }else if (isBuffer()){
+        return (void*) new VkDescriptorBufferInfo(*m_info.buffer);
     }
-    return (void*) new VkDescriptorBufferInfo(*m_info.buffer);
+    return nullptr;
 }
 
 
@@ -102,9 +110,9 @@ ShaderStages::ShaderStages(const vector<ShaderData>& shaders){
 }
 const VkPipelineShaderStageCreateInfo& ShaderStages::getCompute() const{
     //if there are more than one stage, shader stages cannot be compute, print error
-    if (size() != 1) PRINT_ERROR("Cannot retrieve the right amount of stages(1), size: " << size())
+    if (size() != 1) DEBUG_ERROR("Cannot retrieve the right amount of stages(1), size: " << size())
     //if the only stage isn't compute, print error
-    if ((*this)[0].stage != VK_SHADER_STAGE_COMPUTE_BIT) PRINT_ERROR("Trying to retrieve compute shader stage, but the first stage isn't compute")
+    if ((*this)[0].stage != VK_SHADER_STAGE_COMPUTE_BIT) DEBUG_ERROR("Trying to retrieve compute shader stage, but the first stage isn't compute")
     //return first and only stage
     return (*this)[0];
 }
@@ -119,6 +127,45 @@ DescriptorSet::DescriptorSet(VkDescriptorSet set, const ShaderDataDescriptorSet&
 DescriptorSet::operator VkDescriptorSet(){
     return m_set;
 }
+void DescriptorSet::updateDescriptorsV(const vector<DescriptorUpdateInfo>& infos){
+    vector<VkWriteDescriptorSet> writes(infos.size());
+    //convert infos to VkWriteDescriptorSet structures
+    for (int i = 0; i < (int) infos.size(); i++){
+        saveDescriptorWriteInfo(writes[i], infos[i]);
+    }
+    //update descriptor sets
+    updateDescriptorSets(writes);
+}
+void DescriptorSet::updateDescriptorSets(const vector<VkWriteDescriptorSet>& write_infos){
+    vkUpdateDescriptorSets(g_device, write_infos.size(), write_infos.data(), 0, nullptr);
+}
+uint32_t DescriptorSet::findDescriptor(const DescriptorUpdateInfo& info){
+    return m_layout->find(info.getName());
+}
+void DescriptorSet::updateDescriptorsInternal(vector<VkWriteDescriptorSet>& write_infos, uint32_t){
+    updateDescriptorSets(write_infos);
+}
+void DescriptorSet::saveDescriptorWriteInfo(VkWriteDescriptorSet& write_info, const DescriptorUpdateInfo& info){
+    uint32_t descriptor_index = findDescriptor(info);
+    if (descriptor_index != NPOS_32BIT){
+        //check whether shader descriptor type is of the same type as update info
+        VkDescriptorType shader_descriptor_type = (*m_layout)[descriptor_index].getType().getVulkanDescriptorType();
+        if (shader_descriptor_type == info.getType()){
+            //fill VkWriteDescriptorSet structure
+            write_info = VkWriteDescriptorSet{
+                VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                nullptr, m_set, descriptor_index, 0,
+                1, shader_descriptor_type,
+                info.imageInfo(), info.bufferInfo(), nullptr
+            };
+        }else{
+            DEBUG_ERROR(info.getName() << ": Attempt to write descriptor of invalid type")
+        }
+    }else{
+        DEBUG_ERROR(info.getName() << ": Descriptor of given name not found")
+    }
+}
+
 
 
 void DescriptorSetCounter::addDescriptors(const DescriptorData& data, uint32_t descriptor_count){
@@ -269,7 +316,7 @@ PipelineContext& DirectoryPipelinesContext::getContext(const string& name){
     auto itr = m_pipeline_contexts.find(name);
     //if none could be found, print error
     if (itr == m_pipeline_contexts.end()){
-        PRINT_ERROR("Pipeline context of name " << name << " could not be found.")
+        DEBUG_ERROR("Pipeline context of name " << name << " could not be found.")
     }
     //return reference to given pipeline context
     return itr->second;

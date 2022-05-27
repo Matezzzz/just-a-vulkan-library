@@ -20,9 +20,9 @@ VkBufferMemoryBarrier Buffer::createMemoryBarrier(VkAccessFlags current_access, 
 }
 VkBufferView Buffer::createView(VkFormat format, VkDeviceSize range, VkDeviceSize offset){
     //if offset is out of bounds
-    if (offset >= m_size) PRINT_ERROR("Buffer offset out of bounds")
+    if (offset >= m_size) DEBUG_ERROR("Buffer offset out of bounds")
     //if the view would be out of buffer bounds, print error
-    if (range != VK_WHOLE_SIZE && offset + range > m_size) PRINT_ERROR("The buffer view is created with range outside of actual buffer")
+    if (range != VK_WHOLE_SIZE && offset + range > m_size) DEBUG_ERROR("The buffer view is created with range outside of actual buffer")
     //                                                                              no flags
     VkBufferViewCreateInfo info{VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO, nullptr, 0, m_buffer, format, offset, range};
     return g_allocator.get().createBufferView(info);
@@ -32,6 +32,9 @@ VkMemoryRequirements Buffer::getMemoryRequirements() const{
     VkMemoryRequirements requirements;
     vkGetBufferMemoryRequirements(g_device, m_buffer, &requirements);
     return requirements;
+}
+bool Buffer::isValid() const{
+    return m_buffer != VK_NULL_HANDLE;
 }
 VkDeviceSize Buffer::getSize() const{
     return m_size;

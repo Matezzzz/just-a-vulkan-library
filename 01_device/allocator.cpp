@@ -56,7 +56,7 @@ VkDeviceMemory VulkanAllocator::allocateMemory(VkDeviceSize size, uint32_t type_
         }
     }
     //if no type of memory had the correct properties, print error
-    PRINT_ERROR("Suitable memory not found")
+    DEBUG_ERROR("Suitable memory not found")
     return VK_NULL_HANDLE;
 }
 void* VulkanAllocator::mapMemory(VkDeviceMemory memory, VkDeviceSize offset, VkDeviceSize size){
@@ -138,7 +138,7 @@ void AllocatorWrapper::set(VulkanAllocator& allocator)
     }
     else
     {
-        PRINT_ERROR("Global allocator variable already set")
+        DEBUG_ERROR("Global allocator variable already set")
     }
 }
 AllocatorWrapper::operator VulkanAllocator&()

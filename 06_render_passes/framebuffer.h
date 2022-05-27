@@ -2,7 +2,7 @@
 #define FRAMEBUFFER_H
 
 #include "../00_base/vulkan_base.h"
-
+#include <glm/glm.hpp>
 
 /**
  * FramebufferInfo
@@ -18,8 +18,18 @@ public:
      * @param height framebuffer height
      * @param images image views to form framebuffer 
      * @param render_pass the render pass to use framebuffer with. Note that compatible render_passes can be used as well.
+     * @param create_flags 0 or VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT
      */
     FramebufferInfo(uint32_t width, uint32_t height, const vector<VkImageView>& images, VkRenderPass render_pass, VkFramebufferCreateFlags create_flags = 0);
+
+    /**
+     * Initialize framebuffer info with no flags and 1 layer
+     * @param size framebuffer width and height
+     * @param images image views to form framebuffer 
+     * @param render_pass the render pass to use framebuffer with. Note that compatible render_passes can be used as well.
+     * @param create_flags 0 or VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT
+     */
+    FramebufferInfo(glm::uvec2 size, const vector<VkImageView>& images, VkRenderPass render_pass, VkFramebufferCreateFlags create_flags = 0);
 
     /**
      * Set framebuffer create flags

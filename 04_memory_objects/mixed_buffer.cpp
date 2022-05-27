@@ -59,7 +59,7 @@ uint32_t MixedBufferLayout::find(const string& name){
         if ((*this)[i].name == name) return i;
     }
     //print error if no variable of given name was found
-    PRINT_ERROR("Variable of name '" << name << "' couldn't be found.")
+    DEBUG_ERROR("Variable of name '" << name << "' couldn't be found.")
     return (~0U);
 }
 uint32_t MixedBufferLayout::getSize() const{

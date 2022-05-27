@@ -6,7 +6,10 @@
 #include "../04_memory_objects/image.h"
 #include "../07_shaders/pipelines_context.h"
 #include <glm/glm.hpp>
+#include <map>
 
+
+using std::map;
 
 /**
  * Size3
@@ -60,6 +63,8 @@ class PipelineImageState : public ImageState{
 public:
     //last flags with which the image was used
     VkPipelineStageFlags last_use;
+    //true if there already was a barrier transitioning to current use
+    bool barrier_done;
     
     /**
      * Construct PipelineImageState with no last use, no last layout and access
@@ -71,18 +76,18 @@ public:
      * @param state the state the image is currently in
      * @param last_use the last flags with which it was used in a pipeline
      */
-    PipelineImageState(ImageState state, VkPipelineStageFlags last_use);
+    PipelineImageState(ImageState state, VkPipelineStageFlags last_use = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, bool barrier_done = false);
 };
 
 
 
 /**
- * FlowDescriptorContext
+ * FlowContext
  *  - Holds all images and buffers to be used by flow sections, + their current states
  */
-class FlowDescriptorContext{
+class FlowContext{
     //vector of all images used by flow sections
-    vector<ExtImage> m_images;
+    vector_ext<ExtImage> m_images;
     //states, one for each image
     vector<PipelineImageState> m_image_states;
 
@@ -90,28 +95,52 @@ class FlowDescriptorContext{
     vector<Buffer> m_buffers;
     //states, one for each buffer
     vector<PipelineBufferState> m_buffer_states;
+
+    //list of all registered vertex buffers. First = buffer index, second = buffer size in vertices
+    map<uint32_t, uint32_t> m_vertex_buffer_sizes;
+
+    //dictionary of all push constant data objects. Indexed by name of shader directory 
+    map<string, PushConstantData*> m_push_constants;
+
+    //how large must a staging buffer be to copy all required data in one operation
+    VkDeviceSize m_max_copy_size = 0;
 public:
     /**
-     * Create FlowDescriptorContext without any descriptors.
+     * Create FlowContext without any descriptors.
      */
-    FlowDescriptorContext();
+    FlowContext(int image_count, int buffer_count);
  
     /**
-     * Create FlowDescriptorContext. All images and buffers are assumed to just have been created.
+     * Create FlowContext. All images and buffers are assumed to just have been created.
      * @param images all images to be used by flow sections
      * @param buffers all buffers to be used by flow sections
      */
-    FlowDescriptorContext(const vector<ExtImage>& images, const vector<Buffer>& buffers);
+    FlowContext(const vector_ext<ExtImage>& images, const vector_ext<Buffer>& buffers);
    
     /**
-     * Create FlowDescriptorContext with given images, buffers and their respective states
+     * Create FlowContext with given images, buffers and their respective states
      * @param images all images to be used by flow sections
      * @param image_states list of states, one for each image
      * @param buffers all buffers to be used by flow sections
      * @param buffer_states list of states, one for each buffer
      */
-    FlowDescriptorContext(const vector<ExtImage>& images, const vector<PipelineImageState>& image_states, const vector<Buffer>& buffers, const vector<PipelineBufferState>& buffer_states);
+    FlowContext(const vector_ext<ExtImage>& images, const vector<PipelineImageState>& image_states, const vector_ext<Buffer>& buffers, const vector<PipelineBufferState>& buffer_states);
     
+    void addImage(int i, ExtImage&& image);
+    void addImage(int i, const ExtImage& image);
+    void addBuffer(int i, Buffer&& buffer);
+    void addBuffer(int i, const Buffer& buffer);
+    void addBufferVertex(int i, const Buffer& buffer, uint32_t vertex_count);
+    void addBufferVertexUploadable(int i, const Buffer& buffer, uint32_t vertex_count);
+    void addBufferUploadable(int i, const Buffer& buffer);
+    void addImageUploadable(int i, const ExtImage& image);
+
+    //get the required size of a staging buffer to copy all requested data
+    VkDeviceSize getLargestCopySize() const;
+
+    //assign device local memory to all images and buffers
+    void allocate();
+
     /**
      * Get a reference to the image with given index
      * @param index the index of image to return
@@ -119,10 +148,22 @@ public:
     ExtImage& getImage(uint32_t index);
 
     /**
+     * Get a const reference to the image with given index
+     * @param index the index of image to return
+     */
+    const ExtImage& getImage(uint32_t index) const;
+
+    /**
      * Get a reference to the buffer with given index
      * @param index the index of buffer to return
      */
     Buffer& getBuffer(uint32_t index);
+
+    /**
+     * Get a const reference to the buffer with given index
+     * @param index the index of buffer to return
+     */
+    const Buffer& getBuffer(uint32_t index) const;
 
     /**
      * Get a reference to the state of image of given index.
@@ -147,6 +188,45 @@ public:
      * @param index the index of buffer, the state of which to get
      */
     const PipelineBufferState& getBufferState(uint32_t index) const;
+
+    /**
+     * @brief Save a pointer to given push constant data
+     * 
+     * @param section_name the name, using which the data can be later accessed.
+     * @param data the push constant data to save
+     */
+    void registerPushConstants(const string& section_name, PushConstantData& data);
+
+    /**
+     * @brief Get push constants data based on the name given
+     * 
+     * @param section_name the name under which push constants were registered
+     */
+    PushConstantData& getPushConstants(const string& section_name);
+
+    /**
+     * @brief Save how many vertices a vertex buffer holds
+     * 
+     * @param descriptor_index index of the vertex buffer, can be used later to retrieve the count
+     * @param vertex_count how many vertices the buffer contains
+     */
+    void registerVertexBuffer(uint32_t descriptor_index, uint32_t vertex_count);
+
+    /**
+     * @brief Get how many vertices a vertex buffer with given index contains
+     * 
+     * @param descriptor_index index of the vertex buffer
+     */
+    uint32_t getVertexCount(uint32_t descriptor_index);
+private:
+    //Ensure image at index i hasn't been written before (Image.isValid() must be false to pass the test)
+    void ensureNotWrittenImg(int i) const;
+
+    //Ensure buffer at index i hasn't been written before (Buffer.isValid() must be false to pass the test)
+    void ensureNotWrittenBuf(int i) const;
+
+    //max_copy_size = max(new_size, max_copy_size)
+    void updateLargestCopySize(VkDeviceSize new_size);
 };
 
 
@@ -241,76 +321,7 @@ public:
      * Use given context to fill in missing pieces of update info, then return it
      * @param ctx the flow descriptor context associated with this descriptor
      */
-    DescriptorUpdateInfo getUpdateInfo(FlowDescriptorContext& ctx) const;
-};
-
-
-
-/**
- * FlowStorageImage
- *  - Constructs FlowPipelineSectionDescriptorUsage for storage images
- */
-class FlowStorageImage : public FlowPipelineSectionDescriptorUsage{
-public:
-    /**
-     * Construct FlowStorageImage from given info
-     * @param name name of image in shaders
-     * @param descriptor_index index of image in associated flow descriptor context
-     * @param usage_stages the stages during which image will be used
-     * @param img_state the state image will be in when used
-     */
-    FlowStorageImage(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages, ImageState img_state);
-};
-
-
-/**
- * FlowCombinedImage
- *  - Constructs FlowPipelineSectionDescriptorUsage for combined image samplers
- */
-class FlowCombinedImage : public FlowPipelineSectionDescriptorUsage{
-public:
-    /**
-     * Construct FlowCombinedImage from given info
-     * @param name name of image in shaders
-     * @param descriptor_index index of image in associated flow descriptor context
-     * @param usage_stages the stages during which image will be used
-     * @param img_state the state image will be in when used
-     * @param sampler the sampler to use alongside image
-     */
-    FlowCombinedImage(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages, ImageState img_state, VkSampler sampler);
-};
-
-
-/**
- * FlowUniformBuffer
- *  - Constructs FlowPipelineSectionDescriptorUsage for uniform buffers
- */
-class FlowUniformBuffer : public FlowPipelineSectionDescriptorUsage{
-public:
-    /**
-     * Construct FlowUniformBuffer from given info
-     * @param name name of buffer in shaders
-     * @param descriptor_index index of buffer in associated flow descriptor context
-     * @param usage_stages the stages during which buffer will be used
-     * @param buf_state the state buffer will be in when used
-     */
-    FlowUniformBuffer(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages, BufferState buf_state);
-};
-
-/**
- * FlowStorageBuffer
- *  - Constructs FlowPipelineSectionDescriptorUsage for storage buffers
- */
-class FlowStorageBuffer : public FlowPipelineSectionDescriptorUsage{
-public:
-    /**
-     * Construct FlowStorageBuffer from given info
-     * @param name name of buffer in shaders
-     * @param descriptor_index index of buffer in associated flow descriptor context
-     * @param usage_stages the stages during which buffer will be used
-     * @param buf_state the state buffer will be in when used
-     */
-    FlowStorageBuffer(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages, BufferState buf_state);
+    DescriptorUpdateInfo getUpdateInfo(FlowContext& ctx) const;
 };
 
 

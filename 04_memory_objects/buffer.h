@@ -5,35 +5,29 @@
 #include "mixed_buffer.h"
 
 
-enum BufferStatesEnum{
-    BUFFER_INVALID,
-    BUFFER_NEWLY_CREATED,
-    BUFFER_UNIFORM,
-    BUFFER_STORAGE_R,
-    BUFFER_STORAGE_W,
-    BUFFER_STORAGE_RW
-};
-constexpr VkAccessFlags buffer_states_accesses[]{
-    0,
-    0,
-    VK_ACCESS_SHADER_READ_BIT,
-    VK_ACCESS_SHADER_READ_BIT,
-    VK_ACCESS_SHADER_WRITE_BIT,
-    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-};
-
-
 class BufferState{
 public:
     VkAccessFlags access;
 
-    BufferState() : access(0)
+    constexpr BufferState() : access(0)
     {}
+    constexpr BufferState(VkAccessFlags access_) : access(access_)
+    {}
+};
 
-    BufferState(BufferStatesEnum state) : access(buffer_states_accesses[state])
-    {}
-    /*BufferState(VkAccessFlags access_) : access(access_)
-    {}*/
+
+//Holds several basic BufferStates, for easy access later
+class BufState{
+public:
+    constexpr static BufferState Invalid{0};
+    constexpr static BufferState NewlyCreated{0};
+    constexpr static BufferState TransferSrc{VK_ACCESS_TRANSFER_READ_BIT};
+    constexpr static BufferState TransferDst{VK_ACCESS_TRANSFER_WRITE_BIT};
+    constexpr static BufferState Vertex{VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT};
+    constexpr static BufferState Uniform{VK_ACCESS_SHADER_READ_BIT};
+    constexpr static BufferState StorageR{VK_ACCESS_SHADER_READ_BIT};
+    constexpr static BufferState StorageW{VK_ACCESS_SHADER_WRITE_BIT};
+    constexpr static BufferState StorageRW{VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT};
 };
 
 
@@ -70,6 +64,9 @@ public:
 
     //Get buffer memory requirements
     VkMemoryRequirements getMemoryRequirements() const;
+
+    //true if m_buffer isn't VK_NULL_HANDLE
+    bool isValid() const;
 
     //Get size of buffer in bytes
     VkDeviceSize getSize() const;

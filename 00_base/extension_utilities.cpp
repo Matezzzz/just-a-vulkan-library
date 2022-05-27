@@ -19,7 +19,7 @@ void AvailableExtensionList::extensionsAvailable(const vector<string>& desired_e
         if (found){
             resulting_extensions.push_back(extension);
         }else{
-            PRINT_ERROR("Extension not available: " << extension)
+            DEBUG_ERROR("Extension not available: " << extension)
         }
     }
 }

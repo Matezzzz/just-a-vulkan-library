@@ -8,6 +8,7 @@
 #include "viewport_scissor_info.h"
 #include "blend_info.h"
 #include "multisample_info.h"
+#include <glm/glm.hpp>
 
 
 class Pipeline
@@ -79,7 +80,7 @@ public:
      *  - MultisampleInfo - 1 sample per fragment, sample shading disabled, no shading mask, alpha to coverage disabled, alpha to one disabled
      *  - DepthStencilInfo - no depth test, depth write on, depth compare always, depth bounds test off, stencil test off
      *  - BlendInfo
-     *    - Blend state for each layer set to disabled, source color factor alpha, target color factor (1-src_alpha), color blend op add, source alpha factor one, source target factor zero, alpha blend op add, all colors(RGBA) written
+     *    - Blend state for each layer set to disabled, source color factor alpha, target color factor (1-src_alpha), color blend op add, source alpha alpha, source target factor (1-src_alpha), alpha blend op add, all colors(RGBA) written
      *    - Logical operation disabled, logic operation clear, blend constants 0, 0, 0, 0\n
      *  - DynamicInfo - no dynamic states enabled 
      * @param width width of space to render to
@@ -87,6 +88,25 @@ public:
      * @param color_attachment_count how many color attachments does the pipeline use. Needed for blending.
      */
     PipelineInfo(uint32_t width, uint32_t height, uint32_t color_attachment_count);
+
+    /**
+     * Create a new graphics pipeline info object with given shaders, viewport width and height, and given color attachment count.
+     * Default parameters are as follows:
+     *  - VertexInputInfo - no buffers active
+     *  - AssemblyInfo - topology is triangle list, primitive restart is disabled
+     *  - TesselationInfo - tesselation is disabled by default, is enabled by setting a number of tess points
+     *  - ViewportInfo - both scissor and viewport rect are set to the window size
+     *  - RasterizationInfo - depth clamp off, discard disabled, polygon mode fill, cull mode none, front face counter-clockwise, depth bias disabled, line width 1.f
+     *  - MultisampleInfo - 1 sample per fragment, sample shading disabled, no shading mask, alpha to coverage disabled, alpha to one disabled
+     *  - DepthStencilInfo - no depth test, depth write on, depth compare always, depth bounds test off, stencil test off
+     *  - BlendInfo
+     *    - Blend state for each layer set to disabled, source color factor alpha, target color factor (1-src_alpha), color blend op add, source alpha factor one, source target factor zero, alpha blend op add, all colors(RGBA) written
+     *    - Logical operation disabled, logic operation clear, blend constants 0, 0, 0, 0\n
+     *  - DynamicInfo - no dynamic states enabled 
+     * @param size width, height of the space to render to
+     * @param color_attachment_count how many color attachments does the pipeline use. Needed for blending.
+     */
+    PipelineInfo(const glm::uvec2& size, uint32_t color_attachment_count);
 
     /**
      * Create a pipeline object for the given render pass and subpass
@@ -145,8 +165,7 @@ public:
 
 
 
-class ComputePipelineInfo
-{
+class ComputePipelineInfo{
 public:
     ComputePipelineInfo();
 

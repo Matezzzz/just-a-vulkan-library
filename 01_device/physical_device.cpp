@@ -95,7 +95,7 @@ PhysicalDevice& PhysicalDevice::requestFeatures(const PhysicalDeviceFeatures& fe
             if (available_features_prt[i]){
                 enabled_features_prt[i] = desired_features_prt[i];
             }else{
-                PRINT_ERROR("Requested feature " << feature_names[i] << " is not available on this device")
+                DEBUG_ERROR("Requested feature " << feature_names[i] << " is not available on this device")
             }
         }
     }
@@ -143,7 +143,7 @@ PhysicalDevice& PhysicalDevice::requestQueues(const vector<QueueRequestInfo>& qu
         }
         //if queue of given properties isn't available, print error
         if (!found){
-            PRINT_ERROR("Requested queues are not available")
+            DEBUG_ERROR("Requested queues are not available")
         }
     }
     return *this;
@@ -193,7 +193,7 @@ PhysicalDevice PhysicalDevices::choose(){
     VkPhysicalDeviceProperties properties;
     //if there are no devices supporting vulkan on the system, print error
     if (m_devices.size() == 0){
-        PRINT_ERROR("No vulkan compatible devices found")
+        DEBUG_ERROR("No vulkan compatible devices found")
         throw std::runtime_error("No vulkan devices found.");
     }
     //if there is one vulkan device, pick it

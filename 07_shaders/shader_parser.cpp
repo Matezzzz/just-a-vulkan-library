@@ -70,7 +70,7 @@ void PushConstantLayout::combineWith(const PushConstantLayout& p){
             }
             //if constant overlaps with one already here, print error and skip adding this one
             if (t.overlaps(t2)){
-                PRINT_ERROR("The push constant variables " << t.name << " and " << t2.name << " overlap.")
+                DEBUG_ERROR("The push constant variables " << t.name << " and " << t2.name << " overlap.")
                 overlaps_other = true;
                 break;
             }
@@ -164,7 +164,7 @@ void ShaderDataDescriptorSet::combineWith(const ShaderDataDescriptorSet& s){
         if (getDescriptor(b) == s[b]){
             getDescriptor(b).addStages(s[b].getStages());
         }else{
-            PRINT_ERROR("Descriptors " << getDescriptor(b).str() << " and " << s[b].str() << " share the same bindings but not other parameters")
+            DEBUG_ERROR("Descriptors " << getDescriptor(b).str() << " and " << s[b].str() << " share the same bindings but not other parameters")
         }
     }
 }
@@ -208,12 +208,12 @@ uint32_t ShaderDataDescriptorSet::find(const string& descriptor_name) const{
         if (getDescriptor(i).getName() == descriptor_name) return i;
     }
     //if name couldn't be found, print error
-    PRINT_ERROR("Descriptor of name '" << descriptor_name << "' couldn't be found in the given set")
+    DEBUG_ERROR("Descriptor of name '" << descriptor_name << "' couldn't be found in the given set")
     return (NPOS_32BIT);
 }
 UniformBufferLayoutData ShaderDataDescriptorSet::createUniformBufferData(uint32_t b){
     if (!getDescriptor(b).isUniform()){
-        PRINT_ERROR("Requesting subset variables data for non-uniform descriptor.")
+        DEBUG_ERROR("Requesting subset variables data for non-uniform descriptor.")
         return UniformBufferLayoutData();
     }
     //get ptr to subset variables
@@ -365,7 +365,7 @@ void ShaderDataInfo::parseShaderLine(parse::string_view line){
         }
         //if type isn't any of the above, print error
         else{
-            PRINT_ERROR("Invalid variable type found: \'" << info_type.str() << "\'");
+            DEBUG_ERROR("Invalid variable type found: \'" << info_type.str() << "\'");
         }
     }
     return;

@@ -2,6 +2,7 @@
 #define IMAGE_H
 
 #include "../00_base/vulkan_base.h"
+#include "../09_utilities/vector_ext.h"
 
 /**
  * Represents image format.
@@ -17,60 +18,40 @@ public:
 };
 
 
-enum ImageStatesEnum{
-    IMAGE_INVALID,
-    IMAGE_NEWLY_CREATED,
-    IMAGE_SAMPLER,
-    IMAGE_STORAGE_R,
-    IMAGE_STORAGE_W,
-    IMAGE_STORAGE_RW,
-    IMAGE_TRANSFER_SRC,
-    IMAGE_TRANSFER_DST,
-    IMAGE_COLOR_ATTACHMENT,
-    IMAGE_DEPTH_ATTACHMENT,
-    IMAGE_DEPTH_STENCIL_ATTACHMENT
-};
-constexpr VkImageLayout image_states_layouts[]{
-    VK_IMAGE_LAYOUT_MAX_ENUM,
-    VK_IMAGE_LAYOUT_UNDEFINED,
-    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-    VK_IMAGE_LAYOUT_GENERAL,
-    VK_IMAGE_LAYOUT_GENERAL,
-    VK_IMAGE_LAYOUT_GENERAL,
-    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-};
-constexpr VkAccessFlags image_states_accesses[]{
-    0,
-    0,
-    VK_ACCESS_SHADER_READ_BIT,
-    VK_ACCESS_SHADER_READ_BIT,
-    VK_ACCESS_SHADER_WRITE_BIT,
-    VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
-    VK_ACCESS_TRANSFER_READ_BIT,
-    VK_ACCESS_TRANSFER_WRITE_BIT,
-    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-    VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-    VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
-};
-
 
 constexpr VkImageLayout LAYOUT_NOT_USED_YET = VK_IMAGE_LAYOUT_MAX_ENUM;
 class ImageState{
 public:
     VkImageLayout layout;
     VkAccessFlags access;
-    
-    ImageState();
-    ImageState(VkImageLayout layout, VkAccessFlags access);
-    ImageState(ImageStatesEnum s);
+
+    constexpr ImageState() : ImageState(VK_IMAGE_LAYOUT_UNDEFINED, 0)
+    {}
+    constexpr ImageState(VkImageLayout layout_, VkAccessFlags access_) : layout(layout_), access(access_)
+    {}
     bool operator==(const ImageState& s);
     bool operator!=(const ImageState& s);
     string toString() const;
 };
+
+
+//A class with several basic ImageState variables for easy access
+class ImgState{
+public:
+    constexpr static ImageState Invalid         {VK_IMAGE_LAYOUT_MAX_ENUM, 0};
+    constexpr static ImageState NewlyCreated    {VK_IMAGE_LAYOUT_UNDEFINED, 0};
+    constexpr static ImageState Undefined       {VK_IMAGE_LAYOUT_UNDEFINED, 0};
+    constexpr static ImageState Sampled         {VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT};
+    constexpr static ImageState StorageR        {VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT};
+    constexpr static ImageState StorageW        {VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT};
+    constexpr static ImageState StorageRW       {VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT};
+    constexpr static ImageState TransferSrc     {VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_ACCESS_TRANSFER_READ_BIT};
+    constexpr static ImageState TransferDst     {VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT};
+    constexpr static ImageState ColorAttachment {VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT};
+    constexpr static ImageState DepthAttachment {VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT};
+    constexpr static ImageState DepthStencilAttachment{VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT};
+};
+
 
 
 
@@ -106,6 +87,9 @@ public:
 
     //get a reference to parent image
     const Image& getImage() const;
+
+    //true if m_view is not VK_NULL_HANDLE
+    bool isValid() const;
 };
 
 
@@ -158,6 +142,9 @@ public:
     const Format& getFormat() const;
     VkImageAspectFlags getAspect() const;
 
+    //true if m_image isn't VK_NULL_HANDLE
+    bool isValid() const;
+
     //Get the size the image will occupy in bytes. This is used mainly to determine size for copying operations
     VkDeviceSize getSizeInBytes() const;
     //Get memory requirements. This is used when allocating memory for the image.
@@ -173,21 +160,23 @@ public:
 class ExtImage : public Image{
     ImageView m_view;
 public:
-    ExtImage(VkImage image, const VkImageCreateInfo& info) : Image(image, info), m_view()
-    {}
-    operator VkImageView(){
-        return view();
-    }
-    VkImageView view(){
-        if (m_view == VK_NULL_HANDLE) m_view = createView();
-        return m_view;
-    }
+    //create invalid ExtImage
+    ExtImage();
+
+    //create ExtImage with given image and given info
+    ExtImage(VkImage image, const VkImageCreateInfo& info);
+
+    //return a view if it has been created before, create and return it otherwise
+    operator const ImageView&();
+
+    //return a view if it has been created before, create and return it otherwise
+    operator VkImageView();
+
+    //return a view if it has been created before, create and return it otherwise
+    const ImageView& view();
 };
 
 
-//return a vector of pointers to each element of vector given
-template<typename T>
-vector<T*> vectorOfPointers(vector<T>& vec);
 
 
 /**
@@ -199,7 +188,29 @@ class ImageMemoryObject{
 public:
     //create invalid memory object
     ImageMemoryObject();
-    ImageMemoryObject(const vector<Image>& images, VkMemoryPropertyFlagBits memory_properties);
+    
+    /**
+     * @brief Assign memory to all images in given vector
+     * 
+     * @param images the images to assign memory to
+     * @param memory_properties properties of the memory, VK_MEMORY_PROPERTY_***
+     */
+    ImageMemoryObject(const vector_ext<Image>& images, VkMemoryPropertyFlagBits memory_properties);
+    
+    /**
+     * @brief Assign memory to all ExtImage images in given vector
+     * 
+     * @param images the images to assign memory to
+     * @param memory_properties properties of the memory, VK_MEMORY_PROPERTY_***
+     */
+    ImageMemoryObject(const vector_ext<ExtImage>& images, VkMemoryPropertyFlagBits memory_properties);
+    
+    /**
+     * @brief Assign memory to all images in given vector
+     * 
+     * @param images the images to assign memory to
+     * @param memory_properties properties of the memory, VK_MEMORY_PROPERTY_***
+     */
     ImageMemoryObject(const vector<const Image*>& images, VkMemoryPropertyFlagBits memory_properties);
 };
 

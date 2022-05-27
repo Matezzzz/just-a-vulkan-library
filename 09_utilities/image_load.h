@@ -9,10 +9,8 @@
  * ImageData
  *  - Class for loading a texture from a file. stb_image.h is used to load images from various file formats.
  */
-class ImageData{
+class ImageData : public vector<uint8_t>{
 public:
-    //pointer to image bytes
-    vector<uint8_t> data;
     //width, height, number of components
     int width, height, comp;
     //load image from given file with expected number of components

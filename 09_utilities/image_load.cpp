@@ -11,11 +11,11 @@ ImageData::ImageData(const string& filename, uint32_t comp_c){
     //load image with given filename using stb_image.h, save width, height and component count
     uint8_t* im_data = stbi_load(filename.c_str(), &width, &height, &comp, comp_c);
     if (im_data == nullptr){
-        PRINT_ERROR("Image " << filename << " could not be loaded.")
+        DEBUG_ERROR("Image " << filename << " could not be loaded.")
         return;
     }
     //store image data as a vector to prevent bothering myself with having to delete pointer responsibly
-    data = vector<uint8_t>(im_data, im_data+width*height*comp);
+    vector<uint8_t>::operator=(vector<uint8_t>(im_data, im_data+width*height*comp));
     //free image data
     stbi_image_free(im_data);
 }
@@ -84,7 +84,7 @@ void ImageSet::createImages(LocalObjectCreator& object_creator, const ImageSetOp
 
     //copy loaded image data to each image
     for (uint32_t i = 0; i < image_count; i++){
-        object_creator.copyToLocal(image_data[i].data.data(), image_data[i].size(), (*this)[i], ImageState{IMAGE_NEWLY_CREATED}, options.getState());
+        object_creator.copyToLocal(image_data[i].data(), image_data[i].size(), (*this)[i], ImgState::NewlyCreated, options.getState());
     }
 }
 vector<const Image*> ImageSet::vectorOfImages(){

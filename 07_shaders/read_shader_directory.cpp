@@ -34,7 +34,7 @@ string ShaderData::readFileToString(const string& filename){
     //read contents to string
     string file_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     //if string has length 0 if file couldn't be found, print error
-    if (file_data.size() == 0) PRINT_ERROR("File \'" << filename << "\' not found");
+    if (file_data.size() == 0) DEBUG_ERROR("File \'" << filename << "\' not found");
     return file_data;
 }
 
@@ -54,7 +54,7 @@ ShaderDirectoryData::ShaderDirectoryData(const string& shader_context_dir, const
         ShaderStage stage = getShaderStage(shader_ext);
         //if extension couldn't be identified, print error and skip this file
         if (stage == SHADER_STAGE_INVALID){
-            PRINT_ERROR("Invalid shader suffix:" << shader_ext)
+            DEBUG_ERROR("Invalid shader suffix:" << shader_ext)
             continue;
         }
         //if extension is legit, add file to the list of current shaders

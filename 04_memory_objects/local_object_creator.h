@@ -27,18 +27,88 @@ class Queue;
 class Image;
 
 
+
+
+
+/**
+ * Allows data to be copied to it, then, vulkan functions can be used to send it to the GPU
+ */
+class StagingBuffer : public Buffer{
+    SharedBufferMemoryObject m_memory;
+    uint32_t m_current_data_size;
+public:
+    StagingBuffer(VkDeviceSize size) : Buffer(BufferInfo{size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT}.create()), m_memory({*this})
+    {}
+
+    /**
+     * Copy buffer data to the GPU
+     * @param data data to copy
+     * @param device_local_buffer buffer to copy to
+     */
+    template<typename T>
+    void copyTo(const vector<T>& data){
+        copyTo(data.data(), data.size());
+    }
+
+    /**
+     * Copy buffer data to the staging buffer
+     * @param data_typed pointer to data. Has to be of same type as data
+     * @param data_size how many elements of above data should be copied
+     */
+    template<typename T>
+    void copyTo(const T* data_typed, VkDeviceSize data_size){
+        //compute data size in bytes
+        m_current_data_size = data_size * sizeof(T);
+
+        DEBUG_CHECK("Data is longer than the staging buffer", data_size > getSize())
+        
+        //since staging buffer is in shared memory, simply copy data to it
+        //          index of buffer to copy to
+        m_memory.copyToBuffer(0, data_typed, m_current_data_size, 0);
+    }
+
+    /**
+     * @brief Copy from this buffer to another one on the GPU.
+     * 
+     * @param cmd_buf the command buffer to record this operation on
+     * @param buffer the destination buffer
+     * @param dst_offset offset in the destination buffer
+     */
+    void transfer(CommandBuffer& cmd_buf, const Buffer& buffer, uint32_t dst_offset = 0);
+    
+    /**
+     * @brief Copy from this buffer to an image on the GPU.
+     * 
+     * @param cmd_buf the command buffer to record this operation on
+     * @param image the destination image
+     */
+    void transfer(CommandBuffer& cmd_buf, const Image& image);
+
+    /**
+     * @brief Copy from this buffer to an image on the GPU. Transition the image before and after the transfer.
+     * ! is deperecated for use with FlowContext and FlowSections - doesn't update image state correctly
+     * 
+     * @param cmd_buf the command buffer to record this operation on
+     * @param image the destination image
+     * @param begin_state the state image is in currently
+     * @param end_state the state image should be in after the transfer ends
+     */
+    void transferWithTransitions(CommandBuffer& cmd_buf, const Image& image, ImageState begin_state, ImageState end_state);
+};
+
+
+
+
 /**
  * LocalObjectCreator
  *  - class responsible for uploading data to buffers and images on the GPU
  *  - can create buffers as well
+ *  ! is deprecated for use with FlowSections & FlowContext - doesn't update image states correctly
+ *  ! use FlowTransferMaster instead
  */
 class LocalObjectCreator{
-    //size of staging buffer in bytes
-    VkDeviceSize m_staging_buffer_size;
     //buffer in the shared memory - data is uploaded into it, and from it, to the GPU
-    Buffer m_staging_buffer;
-    //memory object for the staging buffer
-    SharedBufferMemoryObject m_staging_buffer_memory;
+    StagingBuffer m_staging_buffer;
     //command buffer for transfer command
     CommandBuffer m_transfer_command_buffer;
     //the queue to upload transfers to
@@ -74,18 +144,16 @@ public:
         //interpret data as an array of bytes
         const uint8_t* data = reinterpret_cast<const uint8_t*>(data_typed);
         //Split data into multiple chunks, each one the size of staging buffer. Go through each chunk to copy:
-        for (VkDeviceSize data_offset = 0; data_offset < data_size; data_offset += m_staging_buffer_size){
+        for (VkDeviceSize data_offset = 0; data_offset < data_size; data_offset += m_staging_buffer.getSize()){
             //find end of range to copy - is either staging buffer size or end of buffer to copy from
-            uint32_t data_end = std::min(data_offset + m_staging_buffer_size, data_size);
+            uint32_t data_end = std::min(data_offset + m_staging_buffer.getSize(), data_size);
             
-            //since staging buffer is in shared memory, simply copy data to it
-            //          index of buffer to copy to
-            m_staging_buffer_memory.copyToBuffer(0, &data[data_offset], data_end - data_offset, data_offset);
+
+            m_staging_buffer.copyTo(data + data_offset, data_end - data_offset);
             
             //record command buffer for copying data with only one copy command
             m_transfer_command_buffer.startRecordPrimary(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-            //record copy command
-            m_transfer_command_buffer.cmdCopyFromBuffer(m_staging_buffer, device_local_buffer, data_end - data_offset, 0, data_offset);
+            m_staging_buffer.transfer(m_transfer_command_buffer, device_local_buffer, data_offset);
             m_transfer_command_buffer.endRecord();
 
             //create synchronization for submitting buffer

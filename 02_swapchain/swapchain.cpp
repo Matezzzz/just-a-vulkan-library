@@ -9,7 +9,7 @@ SwapchainImage::SwapchainImage(const Image& image, VkFramebuffer framebuffer, ui
 uint32_t SwapchainImage::getIndex() const{
     //if the image wasn't initialized with valid values, print error and return invalid index
     if (m_image_index == IMAGE_INDEX_INVALID){
-        PRINT_ERROR("Asking for index of invalid swapchain image")
+        DEBUG_ERROR("Asking for index of invalid swapchain image")
         return ~0U;
     }
     return m_image_index;
@@ -46,7 +46,7 @@ SwapchainImage Swapchain::acquireImage(){
     }
     //sometimes swapchain can break and invalidate all images. I don't know the conditions under which it happens, so there is no protection against it.
     else if (result == VK_ERROR_OUT_OF_DATE_KHR){
-        PRINT_ERROR("Have to create new swapchain. This one is broken")
+        DEBUG_ERROR("Have to create new swapchain. This one is broken")
         throw std::runtime_error("Swapchain broken (VK_ERROR_OUT_OF_DATE_KHR)");
     }
     //if no images are ready yet
@@ -57,7 +57,7 @@ void Swapchain::prepareToDraw(){
     if (m_image_acquire_fence.waitFor(SYNC_FRAME)){
         m_image_acquire_fence.reset();
     }else{
-        PRINT_ERROR("No image available for the next frame");
+        DEBUG_ERROR("No image available for the next frame");
     }
 }
 void Swapchain::presentImage(const SwapchainImage& img, const Queue& queue){
@@ -90,6 +90,9 @@ uint32_t Swapchain::getWidth() const
 uint32_t Swapchain::getHeight() const
 {
     return m_swapchain_image_info.get().extent.height;
+}
+glm::uvec2 Swapchain::getSize() const{
+    return glm::uvec2(getWidth(), getHeight());
 }
 VkFormat Swapchain::getFormat() const
 {

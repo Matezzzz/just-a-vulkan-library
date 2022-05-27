@@ -50,5 +50,11 @@
 #include "09_utilities/camera.h"
 #include "09_utilities/data_creator.h"
 #include "09_utilities/image_load.h"
-#include "09_utilities/flow_sections_base.h"
-#include "09_utilities/flow_sections.h"
+#include "09_utilities/vector_ext.h"
+
+#include "10_flow/flow_base.h"
+#include "10_flow/flow_render_pass_sections.h"
+#include "10_flow/flow_section_descriptors.h"
+#include "10_flow/flow_sections_pipeline.h"
+#include "10_flow/flow_sections_transfer.h"
+#include "10_flow/flow_sections.h"

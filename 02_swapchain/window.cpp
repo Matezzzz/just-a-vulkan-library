@@ -1,7 +1,7 @@
 #include "window.h"
 
 Window::Window(const VkInstance instance, uint32_t screen_width, uint32_t screen_height, string title) :
-    m_width(screen_width), m_height(screen_height), m_vulkan_instance(instance)
+    width(screen_width), height(screen_height), m_vulkan_instance(instance)
 {
     //initialize GLFW
     glfwInit();
@@ -10,7 +10,7 @@ Window::Window(const VkInstance instance, uint32_t screen_width, uint32_t screen
     //window will not be resizable
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     //create window
-    m_window = glfwCreateWindow(m_width, m_height, title.c_str(), nullptr, nullptr);
+    m_window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     //create vulkan surface for the window
     VkResult result = glfwCreateWindowSurface(m_vulkan_instance, m_window, nullptr, &m_screen_surface);
     DEBUG_CHECK("Create window surface", result);
@@ -47,15 +47,12 @@ const VkSurfaceKHR& Window::getSurface() const{
 Window::operator GLFWwindow*(){
     return m_window;
 }
-uint32_t Window::getWidth() const{
-    return m_width;
-}
-uint32_t Window::getHeight() const{
-    return m_height;
-}
-glm::vec2 Window::getSize() const
+glm::uvec2 Window::size() const
 {
-    return {m_width, m_height};
+    return {width, height};
+}
+glm::vec2 Window::fsize() const{
+    return size();
 }
 void Window::destroy(){
     //if screen surface was created, destroy it

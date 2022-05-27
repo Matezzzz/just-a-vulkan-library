@@ -41,7 +41,7 @@ BlendState& BlendState::setWriteMask(VkColorComponentFlags mask)
 
 BlendInfo::BlendInfo(uint32_t color_attachment_count) : m_blend_settings(color_attachment_count, 
 {false, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA, VK_BLEND_OP_ADD,
-        VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+        VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA, VK_BLEND_OP_ADD,
         VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT}),
     m_info{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO, nullptr, 0,
         false, VK_LOGIC_OP_CLEAR, (uint32_t) m_blend_settings.size(), m_blend_settings.data(), 

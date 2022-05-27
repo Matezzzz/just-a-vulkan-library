@@ -141,25 +141,54 @@ public:
      * @param count how many buffers are in the array
      */
     void cmdExecuteCommands(const VkCommandBuffer* buffers, uint32_t count);
+    
+    /**
+     * Copy from one buffer to another.
+     * 
+     * @param from source buffer
+     * @param to destination buffer
+     * @param size size in bytes
+     * @param offset_to offset in target buffer
+     */
+    void cmdCopyBuffer(const Buffer& from, const Buffer& to, uint32_t size, uint32_t offset_to = 0);
 
     /**
-     * Copy data from one buffer to another
+     * Copy from one buffer to another.
+     * 
+     * @param from source buffer
+     * @param to destination buffer
+     * @param size size in bytes
+     * @param offset_from offset in source buffer
+     * @param offset_to offset in target buffer
+     */
+    void cmdCopyBuffer(const Buffer& from, const Buffer& to, uint32_t size, uint32_t offset_from, uint32_t offset_to);
+
+    /**
+     * Copy from a buffer to an image. Size is determined to fit the whole image.
+     * 
+     * @param from source buffer
+     * @param to destination image
+     */
+    void cmdCopyBufferToImage(const Buffer& from, const Image& to);
+
+    /**
+     * Copy data from one buffer to another. Checks for writing out of range.
      * @param from source buffer
      * @param to target buffer
-     * @param size number of bytes to copy
+     * @param size number of bytes to copy. Can be VK_WHOLE_SIZE to match the source buffer.
      * @param from_offset offset in source buffer
      * @param to_offset offset in target buffer
      */
     void cmdCopyFromBuffer(const Buffer& from, const Buffer& to, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize from_offset = 0, VkDeviceSize to_offset = 0);
 
     /**
-     * Copy data from buffer to image
+     * Copy data from buffer to image. Use image barriers to ensure image is in the correct state.
      * @param from source buffer
      * @param to target image
      * @param state state the image is in
      * @param end_state state the image should end in
      */
-    void cmdCopyToTexture(const Buffer& from, Image& to, ImageState state, ImageState end_state);
+    void cmdCopyToTexture(const Buffer& from, const Image& to, ImageState state, ImageState end_state);
 
     /**
      * Begin renderpass

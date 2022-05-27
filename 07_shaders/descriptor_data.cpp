@@ -91,7 +91,7 @@ uint32_t DescriptorParameterVector::readInt(parse::string_view v){
         return std::stoi(string(v));
     }
     catch (std::invalid_argument& e){
-        PRINT_ERROR(e.what() << " : Cannot convert value to int. " << v.str())
+        DEBUG_ERROR(e.what() << " : Cannot convert value to int. " << v.str())
         return PARAMETER_VALUE_NONE;
     }
 }
@@ -118,7 +118,7 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
     while ((word = name_type_info.getUntilCharView(offset, ' ', true)).size()){
         //print error if name has been read already and there are still words left
         if (read_phase == PHASE_READ_NAME){
-            PRINT_ERROR("Name has been read already and the input string still continues : " << word.str())
+            DEBUG_ERROR("Name has been read already and the input string still continues : " << word.str())
         }
         //if type has been read already, only name and array length is left to read
         if (read_phase == PHASE_READ_TYPE){
@@ -163,7 +163,7 @@ DescriptorData::DescriptorData(parse::string_view name_type_info, const Descript
         }
     }
     //if all data couldn't be read from given string
-    if (read_phase != PHASE_READ_NAME) PRINT_ERROR("All information could not be gathered from given string")
+    if (read_phase != PHASE_READ_NAME) DEBUG_ERROR("All information could not be gathered from given string")
 }
 
 DescriptorData::DescriptorData(const DescriptorData& d) : m_set(d.m_set), m_binding(d.m_binding), m_stage(d.m_stage), m_type(d.m_type), m_name(d.m_name), m_count(d.m_count){
@@ -239,7 +239,7 @@ const InputAttachmentDescriptorData* DescriptorData::getInputAttachmentData() co
 }
 PushConstantShaderData DescriptorData::convertToPushConstant(){
     //print error if type isn't convertible
-    if (!m_type.isUniformBuffer()) PRINT_ERROR("Converting a different type of descriptor than uniform buffer to push constant. Descriptor name :" << m_name)
+    if (!m_type.isUniformBuffer()) DEBUG_ERROR("Converting a different type of descriptor than uniform buffer to push constant. Descriptor name :" << m_name)
     //create push constant data from descriptor name and subset variables
     PushConstantShaderData x{m_name, getSubsetVariables()};
     return x;

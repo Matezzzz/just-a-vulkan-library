@@ -60,11 +60,13 @@ extern HANDLE hConsole;
 //print cyan? text with file and line
 #define PRINT_DEBUG(text) {SetConsoleTextAttribute(hConsole, 11); DEBUG_OUT << __FILE__ << ":" << __LINE__ << " : " << text << ".\n"; SetConsoleTextAttribute(hConsole, 15);}
 //print red text with relative path to file and line where error happened
-#define PRINT_ERROR(text) {SetConsoleTextAttribute(hConsole, 4); DEBUG_OUT << __FILE__ << ":" << __LINE__ << " : " << text << ".\n"; SetConsoleTextAttribute(hConsole, 15);}
+#define PRINT_ERROR(text) {SetConsoleTextAttribute(hConsole, 4); DEBUG_OUT << __FILE__ << ":" << __LINE__ << " : " << text << ".\n"; SetConsoleTextAttribute(hConsole, 15); }
+//print error and end the app
+#define DEBUG_ERROR(name) {PRINT_ERROR(name); raise(SIGINT);}
 //if (result != 0), print error with name and location of occurence
-#define DEBUG_CHECK(name, result) if (result) {PRINT_ERROR(name << " failed. Code: " << result); throw std::runtime_error(name);}
+#define DEBUG_CHECK(name, result) if (result) {DEBUG_ERROR(name << " failed. Code: " << (result));}
 //if (result == 0), print error with name and location of occurence
-#define DEBUG_CHECK_INV(name, result) if (!result) {PRINT_ERROR(name << " failed."); throw std::runtime_error(name);}
+#define DEBUG_CHECK_INV(name, result) if (!result) {DEBUG_ERROR(name << " failed.");}
 
 
 //define to enable more thorough information about what is currently happening
@@ -72,10 +74,11 @@ extern HANDLE hConsole;
 
 //if debug, success of the major operations is printed too
 #ifdef DEBUG
-#define DEBUG_PRINT(name, result) if (result) {PRINT_ERROR(name << " failed. Code: " << result); throw std::runtime_error(name);} else {PRINT_SUCCESS(name << " : OK")}
-#define DEBUG_PRINT_INV(name, result) if (!result) {PRINT_ERROR(name << " failed."); throw std::runtime_error(name);} else {PRINT_SUCCESS(name << " : OK")}
+#define DEBUG_PRINT(name, result) if (result) {DEBUG_ERROR(name << " failed. Code: " << result); } else {PRINT_SUCCESS(name << " : OK")}
+#define DEBUG_PRINT_INV(name, result) if (!result) {DEBUG_ERROR(name << " failed."); } else {PRINT_SUCCESS(name << " : OK")}
 //otherwise, print only errors
 #else
+#define DEBUG_ERROR(name) PRINT_ERROR(name)
 #define DEBUG_PRINT(name, result) DEBUG_CHECK(name, result)
 #define DEBUG_PRINT_INV(name, result) DEBUG_CHECK_INV(name, result)
 #endif

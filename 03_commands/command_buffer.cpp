@@ -85,31 +85,41 @@ void CommandBuffer::cmdBarrier(VkPipelineStageFlags past_stages, VkPipelineStage
         0, nullptr,     //no buffer barriers
         memory_barriers.size(), memory_barriers.data());
 }
+void CommandBuffer::cmdCopyBuffer(const Buffer& from, const Buffer& to, uint32_t size, uint32_t offset_to){
+    cmdCopyBuffer(from, to, size, 0, offset_to);
+}
+void CommandBuffer::cmdCopyBuffer(const Buffer& from, const Buffer& to, uint32_t size, uint32_t offset_from, uint32_t offset_to){
+    VkBufferCopy copy{offset_from, offset_to, size};
+    vkCmdCopyBuffer(m_buffer, from, to, 1, &copy);
+}
+void CommandBuffer::cmdCopyBufferToImage(const Buffer& from, const Image& to){
+    //values - buffer offset, buffer_row_length(0 for tightly packed), buffer_image_height(0 for tightly packed)
+    // - VkImageSubresourceLayers - aspect, mipmap level to copy to, base array layer to copy to, number of layers to copy to
+    // - VkOffset3D - offset in image to copy into
+    // - size of image volume to copy into
+    VkBufferImageCopy copy{0, 0, 0, VkImageSubresourceLayers{to.getAspect(), 0, 0, 1}, VkOffset3D{0, 0, 0}, to.getSize()};
+    vkCmdCopyBufferToImage(m_buffer, from, to, ImgState::TransferDst.layout, 1, &copy);
+}
 void CommandBuffer::cmdCopyFromBuffer(const Buffer& from, const Buffer& to, VkDeviceSize size, VkDeviceSize from_offset, VkDeviceSize to_offset){
     //if the whole size should be copied, get actual size from source buffer
     if (size == VK_WHOLE_SIZE) size = from.getSize();
     //if target memory is invalid (out of bounds), print error and return
     if (to_offset + size > to.getSize()){
-        PRINT_ERROR("Copying outside of buffer boundaries")
+        DEBUG_ERROR("Copying outside of buffer boundaries")
         return;
     }
     //record command to copy data from one buffer to another
-    VkBufferCopy copy{from_offset, to_offset, size};
-    vkCmdCopyBuffer(m_buffer, from, to, 1, &copy);
+    cmdCopyBuffer(from, to, size, from_offset, to_offset);
 }
-void CommandBuffer::cmdCopyToTexture(const Buffer& from, Image& texture, ImageState state, ImageState end_state)
+void CommandBuffer::cmdCopyToTexture(const Buffer& from, const Image& texture, ImageState state, ImageState end_state)
 {
-    ImageState transfer_state = ImageState(IMAGE_TRANSFER_DST);
+    ImageState transfer_state = ImgState::TransferDst;
     //if the image isn't in the correct layout already, record a memory barrier to change the layout
     if (state != transfer_state){
-        cmdBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, texture.createMemoryBarrier(state, ImageState(IMAGE_TRANSFER_DST)));
+        cmdBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, texture.createMemoryBarrier(state, ImgState::TransferDst));
     }
-    //values - buffer offset, buffer_row_length(0 for tightly packed), buffer_image_height(0 for tightly packed)
-    // - VkImageSubresourceLayers - aspect, mipmap level to copy to, base array layer to copy to, number of layers to copy to
-    // - VkOffset3D - offset in image to copy into
-    // - size of image volume to copy into
-    VkBufferImageCopy copy{0, 0, 0, VkImageSubresourceLayers{texture.getAspect(), 0, 0, 1}, VkOffset3D{0, 0, 0}, texture.getSize()};
-    vkCmdCopyBufferToImage(m_buffer, from, texture, transfer_state.layout, 1, &copy);
+    //do the actual copy
+    cmdCopyBufferToImage(from, texture);
     //if layout needs to be transitioned after end, record the layout transition
     if (end_state != transfer_state){
         cmdBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, texture.createMemoryBarrier(transfer_state, end_state));
@@ -184,11 +194,9 @@ void CommandBuffer::cmdDrawInstances(uint32_t vertex_count, uint32_t instance_co
 void CommandBuffer::cmdDrawVerticesIndexed(uint32_t index_count, uint32_t index_offset, int32_t index_shift){
     cmdDrawInstancesIndexed(index_count, 1, index_offset, 0, index_shift);
 }
-
 void CommandBuffer::cmdDrawInstancesIndexed(uint32_t index_count, uint32_t instance_count, uint32_t index_offset, uint32_t instance_offset, int32_t index_shift){
     vkCmdDrawIndexed(m_buffer, index_count, instance_count, index_offset, index_shift, instance_offset);
 }
-
 void CommandBuffer::cmdEndRenderPass(){
     vkCmdEndRenderPass(m_buffer);
 }

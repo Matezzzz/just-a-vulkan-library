@@ -21,19 +21,12 @@ uint8_t Format::getSize() const{
         return format_sizes[static_cast<uint32_t>(m_format)];
     }
     //for other formats, print error, there was no need to implement this yet
-    PRINT_ERROR("Getting size of format for which the function is not implemented yet")
+    DEBUG_ERROR("Getting size of format for which the function is not implemented yet")
     return 4;   //just guess the size :0
 }
 
 
 
-ImageState::ImageState() : ImageState(IMAGE_NEWLY_CREATED)
-{}
-ImageState::ImageState(VkImageLayout layout_, VkAccessFlags access_) :
-    layout(layout_), access(access_)
-{}
-ImageState::ImageState(ImageStatesEnum s) : ImageState(image_states_layouts[s], image_states_accesses[s])
-{}
 bool ImageState::operator==(const ImageState& s){
     return layout == s.layout && access == s.access;
 }
@@ -64,6 +57,9 @@ VkImageAspectFlags ImageView::getAspect() const{
 }
 const Image& ImageView::getImage() const{
     return *m_parent_image;
+}
+bool ImageView::isValid() const{
+    return m_view != VK_NULL_HANDLE;
 }
 
 
@@ -130,6 +126,10 @@ const Format& Image::getFormat() const{
 VkImageAspectFlags Image::getAspect() const{
     return m_aspect;
 }
+bool Image::isValid() const{
+    return m_image != VK_NULL_HANDLE;
+}
+
 VkMemoryRequirements Image::getMemoryRequirements() const{
     //get memory requirements and return them
     VkMemoryRequirements requirements;
@@ -139,23 +139,33 @@ VkMemoryRequirements Image::getMemoryRequirements() const{
 
 
 
-template<typename T>
-vector<const T*> vectorOfPointers(const vector<T>& vec){
-    //create vector of pointers
-    vector<const T*> v(vec.size());
-    //go through all elements in vec and set each pointer to point to it
-    for (uint32_t i = 0; i < vec.size(); i++){
-        v[i] = &vec[i];
-    }
-    //return vector of pointers
-    return v;
+ExtImage::ExtImage(){}
+ExtImage::ExtImage(VkImage image, const VkImageCreateInfo& info) : Image(image, info), m_view()
+{}
+ExtImage::operator const ImageView&(){
+    return view();
+}
+ExtImage::operator VkImageView(){
+    return view();
+}
+const ImageView& ExtImage::view(){
+    if (!m_view.isValid()) m_view = createView();
+    return m_view;
 }
 
 
 
 ImageMemoryObject::ImageMemoryObject() : m_memory{VK_NULL_HANDLE}
 {}
-ImageMemoryObject::ImageMemoryObject(const vector<Image>& images, VkMemoryPropertyFlagBits memory_properties) : ImageMemoryObject(vectorOfPointers(images), memory_properties)
+//given an Image, return a pointer to it
+const Image* convertImg(const Image& a){return &a;}
+ImageMemoryObject::ImageMemoryObject(const vector_ext<Image>& images, VkMemoryPropertyFlagBits memory_properties) :
+    ImageMemoryObject(images.convert(convertImg), memory_properties)
+{}
+//given an ExtImage, return a pointer to parent image
+const Image* convertExt(const ExtImage& a){return &(Image&) a;}
+ImageMemoryObject::ImageMemoryObject(const vector_ext<ExtImage>& images, VkMemoryPropertyFlagBits memory_properties) :
+    ImageMemoryObject(images.convert(convertExt), memory_properties)
 {}
 ImageMemoryObject::ImageMemoryObject(const vector<const Image*>& images, VkMemoryPropertyFlagBits memory_properties){
     //total size in bytes
