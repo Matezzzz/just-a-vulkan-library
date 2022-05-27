@@ -1,7 +1,17 @@
 #include "flow_section_descriptors.h"
 
-FlowStorageImage::FlowStorageImage(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages, ImageState img_state) :
-    FlowPipelineSectionDescriptorUsage(descriptor_index, usage_stages, img_state, StorageImageUpdateInfo(name, VK_NULL_HANDLE, img_state.layout))
+FlowStorageImageR::FlowStorageImageR(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages) :
+    FlowPipelineSectionDescriptorUsage(descriptor_index, usage_stages, ImgState::StorageR, StorageImageUpdateInfo(name, VK_NULL_HANDLE, ImgState::StorageR.layout))
+{}
+
+
+FlowStorageImageW::FlowStorageImageW(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages) :
+    FlowPipelineSectionDescriptorUsage(descriptor_index, usage_stages, ImgState::StorageW, StorageImageUpdateInfo(name, VK_NULL_HANDLE, ImgState::StorageW.layout))
+{}
+
+
+FlowStorageImageRW::FlowStorageImageRW(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages) :
+    FlowPipelineSectionDescriptorUsage(descriptor_index, usage_stages, ImgState::StorageRW, StorageImageUpdateInfo(name, VK_NULL_HANDLE, ImgState::StorageRW.layout))
 {}
 
 

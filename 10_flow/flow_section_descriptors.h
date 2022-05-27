@@ -6,19 +6,49 @@
 
 
 /**
- * FlowStorageImage
- *  - Constructs FlowPipelineSectionDescriptorUsage for storage images
+ * FlowStorageImageR
+ *  - Constructs FlowPipelineSectionDescriptorUsage for read only storage images
  */
-class FlowStorageImage : public FlowPipelineSectionDescriptorUsage{
+class FlowStorageImageR : public FlowPipelineSectionDescriptorUsage{
 public:
     /**
-     * Construct FlowStorageImage from given info
+     * Construct a read only FlowStorageImage from given info
      * @param name name of image in shaders
      * @param descriptor_index index of image in associated flow descriptor context
      * @param usage_stages the stages during which image will be used
-     * @param img_state the state image will be in when used
      */
-    FlowStorageImage(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages, ImageState img_state);
+    FlowStorageImageR(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages);
+};
+
+
+/**
+ * FlowStorageImage
+ *  - Constructs FlowPipelineSectionDescriptorUsage for write only storage images
+ */
+class FlowStorageImageW : public FlowPipelineSectionDescriptorUsage{
+public:
+    /**
+     * Construct a write only FlowStorageImage from given info
+     * @param name name of image in shaders
+     * @param descriptor_index index of image in associated flow descriptor context
+     * @param usage_stages the stages during which image will be used
+     */
+    FlowStorageImageW(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages);
+};
+
+/**
+ * FlowStorageImage
+ *  - Constructs FlowPipelineSectionDescriptorUsage for storage images allowing reads and writes
+ */
+class FlowStorageImageRW : public FlowPipelineSectionDescriptorUsage{
+public:
+    /**
+     * Construct FlowStorageImage allowing reads and writes from given info
+     * @param name name of image in shaders
+     * @param descriptor_index index of image in associated flow descriptor context
+     * @param usage_stages the stages during which image will be used
+     */
+    FlowStorageImageRW(const string& name, int descriptor_index, VkPipelineStageFlags usage_stages);
 };
 
 
