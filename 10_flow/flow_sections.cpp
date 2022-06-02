@@ -120,6 +120,9 @@ void FlowSectionListBase::addSections(const vector<FlowSection*>& sections){
 }
 
 
+
+FlowSectionList::FlowSectionList(FlowContext& ctx) : FlowSection(ctx)
+{}
 FlowSectionList::FlowSectionList(FlowContext& ctx, const vector<FlowSection*>& sections) : FlowSection(ctx), FlowSectionListBase(sections)
 {}
 void FlowSectionList::complete(){

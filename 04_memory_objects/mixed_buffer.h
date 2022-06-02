@@ -228,6 +228,7 @@ public:
             m_write_offset = roundUpToMemoryBlock(m_write_offset, 16u);
             write(value);
         }
+        m_write_offset = roundUpToMemoryBlock(m_write_offset, 16u);
         return *this;
     }
 };

@@ -172,6 +172,13 @@ public:
 class FlowSectionList : public FlowSection, public FlowSectionListBase{
 public:
     /**
+     * @brief Create without any sections and with given context
+     * 
+     * @param ctx associated flow context
+     */
+    FlowSectionList(FlowContext& ctx);
+
+    /**
      * @brief Create with given sections and context
      * 
      * @param ctx associated flow context
