@@ -228,14 +228,14 @@ public:
 
 
 // concept
-template<class T>
-concept DerivedFromFlowSection = std::is_base_of<FlowSection, T>::value;
+//template<class T>
+//concept DerivedFromFlowSection = std::is_base_of<FlowSection, T>::value;
 
 /**
  * FlowPushConstantSection
  *  - This class is used to extend any pipeline section to support push constants
  */
-template<DerivedFromFlowSection T>
+template<typename T>
 class FlowPushConstantSection : public T{
     //push constant data for given pipeline section
     PushConstantData m_push_constant_data;

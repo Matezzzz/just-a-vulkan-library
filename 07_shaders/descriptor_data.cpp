@@ -23,7 +23,7 @@ bool SubsetVariableVector::operator==(const SubsetVariableVector& d) const{
     if (d.size() != size()) return false;
     //go through all variables and check they are the same, return false if they are not
     for (uint32_t i = 0; i < size(); i++){
-        if ((*this)[i] != d[i]) return false;
+        if (!((*this)[i] == d[i])) return false;
     }
     return true;
 }

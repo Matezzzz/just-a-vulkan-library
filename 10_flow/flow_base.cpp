@@ -115,14 +115,14 @@ const PipelineImageState& FlowContext::getImageState(uint32_t index) const{retur
 PipelineBufferState& FlowContext::getBufferState(uint32_t index){return m_buffer_states[index];}
 const PipelineBufferState& FlowContext::getBufferState(uint32_t index) const{return m_buffer_states[index];}
 void FlowContext::registerPushConstants(const string& section_name, PushConstantData& data){
-    DEBUG_CHECK ("It is not allowed to have two push constant sections of the same name", m_push_constants.contains(section_name))
+    DEBUG_CHECK ("It is not allowed to have two push constant sections of the same name", m_push_constants.count(section_name) != 0)
     m_push_constants.emplace(section_name, &data);
 }
 PushConstantData& FlowContext::getPushConstants(const string& section_name){
     return *m_push_constants[section_name];
 }
 void FlowContext::registerVertexBuffer(uint32_t descriptor_index, uint32_t vertex_count){
-    DEBUG_CHECK ("Vertex buffer registered for a second time", m_vertex_buffer_sizes.contains(descriptor_index))
+    DEBUG_CHECK ("Vertex buffer registered for a second time", m_vertex_buffer_sizes.count(descriptor_index) != 0)
     m_vertex_buffer_sizes.emplace(descriptor_index, vertex_count);
 }
 uint32_t FlowContext::getVertexCount(uint32_t descriptor_index){

@@ -5,7 +5,7 @@ DEPENDENCY_FILES := $(addsuffix .d, $(basename $(notdir $(SRC_FILES))))
 OBJ_FILES := $(addsuffix .o, $(basename $(notdir $(SRC_FILES))))
 
 LDFLAGS := -L"C:/Program Files/MSYS2/mingw64/x86_64-w64-mingw32/lib" -lglfw3dll -static
-CXXFLAGS := -std=c++2a -Wall -Wextra -Wpedantic -g
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g
 
 SHADER_ENDINGS := vert frag geom
 SHADER_FILES := $(wildcard $(addprefix ../shaders/*/*., $(SHADER_ENDINGS)))
